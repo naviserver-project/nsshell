@@ -23,6 +23,7 @@ if {$urls eq ""} {
 foreach url $urls {
     ns_log notice "websocket: shell available under $url"
     ns_register_adp  GET $url [file dirname [info script]]/shell.adp
+    # For ns_conn
     ns_register_tcl  GET $url/conn [file dirname [info script]]/shell-conn.tcl
     ns_register_proc GET $url/connect ::ws::shell::connect
 }
@@ -63,8 +64,9 @@ namespace eval ws::shell {
             set result [string map [list ' \\'] [dict get $info result]]
             switch [dict get $info status] {
                 ok          {set reply "myterm.echo('\[\[;#FFFFFF;\]$result\]');"}
-                error       {set reply "myterm.error('$result');"}      
-                noreturn    {set reply ""}          
+                error       {set reply "myterm.error('$result');"}     
+                # ok but noreply 
+                noreply    {set reply ""}          
             }
         } else {
             ns_log warning "command <$msg> not handled"
@@ -302,7 +304,7 @@ namespace eval ws::shell {
 
         :public method eval {arg kernel channel} {
 
-            # Update lastest kernel used
+            # Update lastest kernel used, ignore "schedule" kernel
             if {$kernel ne "schedule"} {
                 set :kernels($kernel) [list $channel [ns_time]]
             }
@@ -329,7 +331,7 @@ namespace eval ws::shell {
             #    return [list status error result $errorMsg]
             #}
 
-            # Add ns_conn facade to namespace
+            # Add ns_conn proc to namespace
             namespace eval $kernel {
                 proc ns_conn {args} {
                     return [ns_httpget "/shell/conn?args=$args"]
@@ -362,9 +364,9 @@ namespace eval ws::shell {
                         namespace eval $kernel unset $var
                     }
                 }
-                #namespace delete ws::shell::$kernel
+                # If the kernel is "schedule", return with no return
                 if {$kernel eq "schedule"} {  
-                    return [list status noreturn result $result]
+                    return [list status noreply result $result]
                 } else {
                     return [list status ok result $result]
                 }
@@ -452,7 +454,7 @@ namespace eval ws::shell {
     }
     KernelThreadHandler create threadHandler
 
-    # Clear dead kernels every 1 hours
+    # Clear dead kernels every 10 second
     ns_schedule_proc 10 {
         ws::multicast /shell/connect [::ws::build_msg "dropDeadKernels();"]
     }
