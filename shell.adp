@@ -122,10 +122,6 @@
       myterm.clear();
     }
 
-    function dropDeadKernels() {
-      websocket.send(JSON.stringify(['eval', "::ws::shell::handler dropDeadKernels", "schedule"]));
-    }
-
     $(document).ready(function () {
       init()
     });

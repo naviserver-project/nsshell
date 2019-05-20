@@ -250,64 +250,15 @@ namespace eval ws::shell {
         
         :property {supported:1..n eval}
         
-        :variable kernels
 
         :method init {} {
-            array set :kernels {}
-        }
-
-        # Get all kernels
-        :public method getKernels {} {
-            return [array get :kernels]
-        }
-
-        # Drop kernel (delete thread and namespace)
-        :public method dropKernel {name} {
-            threadHandler dropKernel $name
-        }
-
-        # Get alive kernels (user still open the shell)
-        :public method aliveKernels {} {
-            array set tmp [array get :kernels]
-            set alivelist ""
-            foreach conn [ns_connchan list] {
-                foreach name [array names tmp] {
-                    if { [lindex $conn 0] eq [lindex $tmp($name) 0] } {
-                        lappend alivelist $name
-                    }
-                }
-            }
-            return $alivelist
-        }
-
-        # Get dead kernels (user doesn't open the shell and latest command is more than 10 second)
-        :public method deadKernels {} {
-            array set tmp [array get :kernels]
-            set deadlist ""
-            foreach name [array names tmp] {
-                set chn [lindex $tmp($name) 0]
-                set ts [lindex $tmp($name) 1]
-                if {[expr { [ns_time] - $ts} ] > 10 && [lsearch [:aliveKernels] $name] == -1} {
-                    lappend deadlist $name
-                }
-            }
-            return $deadlist
-        }
-
-        # Delete all dead kernels
-        :public method dropDeadKernels {} {
-            foreach name [:deadKernels] {
-                unset :kernels($name)
-                :dropKernel $name
-            }
+            nsv_array set shell_kernels {}
         }
 
         :public method eval {arg kernel channel} {
 
-            # Update lastest kernel used, ignore "schedule" kernel
-            if {$kernel ne "schedule"} {
-                set :kernels($kernel) [list $channel [ns_time]]
-            }
+            # Update lastest kernel used
+            nsv_set shell_kernels $kernel [list $channel [ns_time]]
 
             # Copy object variables from thread into this method
             ns_log notice "[current class] copy variables from thread"
@@ -364,12 +315,7 @@ namespace eval ws::shell {
                         namespace eval $kernel unset $var
                     }
                 }
-                # If the kernel is "schedule", return with no return
-                if {$kernel eq "schedule"} {  
-                    return [list status noreply result $result]
-                } else {
-                    return [list status ok result $result]
-                }
+                return [list status ok result $result]
             }
         }
     }
@@ -421,8 +367,6 @@ namespace eval ws::shell {
                 # Delete interpreter
                 #
                 kernels do [list interp delete $name]
-                # Delete namespace
-                namespace delete $name
                 #
                 # Remove name from the kernels list
                 #
@@ -456,7 +400,20 @@ namespace eval ws::shell {
 
     # Clear dead kernels every 10 second
     ns_schedule_proc 10 {
-        ws::multicast /shell/connect [::ws::build_msg "dropDeadKernels();"]
+        array set kernels [nsv_array get shell_kernels]
+        foreach name [array names kernels] {
+            set is_alive 0
+            foreach conn [ns_connchan list] {
+                if { [lindex $conn 0] eq [lindex $kernels($name) 0] } {
+                    set is_alive 1
+                    break
+                }
+            }
+            if {$is_alive eq 0} {
+                ::ws::shell::kernels do [list interp delete $name]
+                nsv_unset shell_kernels $name
+            }
+        }
     }
 }
 
