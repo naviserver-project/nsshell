@@ -10,7 +10,10 @@
    set kernelID [ns_sha1 naviserver_shell_[ns_conn id]]
 
    # Set ns_conn global variable for this kernel
-   nsv_set shell_conn $kernelID,id [ns_conn id]
+   set conn_commands [list acceptedcompression auth authpassword authuser contentfile contentlength contentsentlength driver files flags form headers host id isconnected location method outputheaders peeraddr peerport pool port protocol query partialtimes request server sock start timeout url urlc urlv version zipaccepted]
+   foreach command $conn_commands {
+      nsv_set shell_conn $kernelID,$command [ns_conn $command]
+   }
  %>
 <html>
 

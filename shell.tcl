@@ -291,7 +291,7 @@ namespace eval ws::shell {
                     if {[nsv_exists shell_conn "$kernel,$args"]} {
                         return [nsv_get shell_conn "$kernel,$args"]
                     } else {
-                        return "command 'ns_conn $args' is unavailable"
+                        return -code error "bad option \"$args\": must be acceptedcompression, auth, authpassword, authuser, contentfile, contentlength, contentsentlength, driver, files, flags, form, headers, host, id, isconnected, location, method, outputheaders, peeraddr, peerport, pool, port, protocol, query, partialtimes, request, server, sock, start, timeout, url, urlc, urlv, version, or zipaccepted"
                     }
                 }
             }
