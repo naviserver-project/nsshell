@@ -24,7 +24,7 @@ foreach url $urls {
     ns_log notice "websocket: shell available under $url"
     ns_register_adp  GET $url [file dirname [info script]]/shell.adp
     # For ns_conn
-    ns_register_tcl  GET $url/conn [file dirname [info script]]/shell-conn.tcl
+    # ns_register_tcl  GET $url/conn [file dirname [info script]]/shell-conn.tcl
     ns_register_proc GET $url/connect ::ws::shell::connect
 }
 
@@ -253,12 +253,14 @@ namespace eval ws::shell {
 
         :method init {} {
             nsv_array set shell_kernels {}
+            nsv_array set shell_conn {}
         }
 
         :public method eval {arg kernel channel} {
 
             # Update lastest kernel used
             nsv_set shell_kernels $kernel [list $channel [ns_time]]
+            nsv_set shell_conn $kernel,channel $channel
 
             # Copy object variables from thread into this method
             ns_log notice "[current class] copy variables from thread"
@@ -285,7 +287,13 @@ namespace eval ws::shell {
             # Add ns_conn proc to namespace
             namespace eval $kernel {
                 proc ns_conn {args} {
-                    return [ns_httpget "/shell/conn?args=$args"]
+                    set commands [list channel]
+                    set kernel [lindex [split [namespace current] ::] 6]
+                    if {$args ni $commands} {
+                        return "unavailable"
+                    } else {
+                        return [nsv_get shell_conn $kernel,$args]
+                    }
                 }
             }
             
@@ -412,6 +420,11 @@ namespace eval ws::shell {
             if {$is_alive eq 0} {
                 ::ws::shell::kernels do [list interp delete $name]
                 nsv_unset shell_kernels $name
+                foreach key [nsv_array names shell_conn] {
+                    if {$name eq [lindex [split $key ,] 0]} {
+                        nsv_unset shell_conn $key
+                    }
+                }
             }
         }
     }
