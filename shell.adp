@@ -8,6 +8,9 @@
    set baseUrl [string trimright $host:$port/[ns_conn url]]
    set wsUri $wsProtocol://$baseUrl/connect
    set kernelID [ns_sha1 naviserver_shell_[ns_conn id]]
+
+   # Set ns_conn global variable for this kernel
+   nsv_set shell_conn $kernelID,id [ns_conn id]
  %>
 <html>
 

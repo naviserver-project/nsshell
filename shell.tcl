@@ -287,12 +287,11 @@ namespace eval ws::shell {
             # Add ns_conn proc to namespace
             namespace eval $kernel {
                 proc ns_conn {args} {
-                    set commands [list channel]
                     set kernel [lindex [split [namespace current] ::] 6]
-                    if {$args ni $commands} {
-                        return "unavailable"
+                    if {[nsv_exists shell_conn "$kernel,$args"]} {
+                        return [nsv_get shell_conn "$kernel,$args"]
                     } else {
-                        return [nsv_get shell_conn $kernel,$args]
+                        return "command 'ns_conn $args' is unavailable"
                     }
                 }
             }
