@@ -57,6 +57,7 @@
     var myterm = $('#term_demo');
     var autocomplete_options = null;
     var wrapper = null;
+    var keywords = [];
 
     function init() {
       initializeTerminal();
@@ -125,6 +126,29 @@
             }
           }
         });
+
+        // Syntax Highlight
+        $.terminal.defaults.formatters.push(function (string) {
+          var quote = "";
+          return string.split(/((?:\s|&nbsp;)+)/).map(function (string) {
+            // Highlight quotes
+            if (quote != "") {
+              if (string.charAt(string.length - 1) == quote) quote = "";
+              return '[[;#cd9078;]' + string + ']';
+            } else if (string.charAt(0) == "\"" || string.charAt(0) == "'") {
+              quote = string.charAt(0);
+              return '[[;#cd9078;]' + string + ']';
+            }
+            // Highlight variable
+            if (string.charAt(0) == "$")
+              return '[[;#85dcf2;]' + string + ']';
+            // Highlight command
+            if (keywords.indexOf(string) != -1)
+              return '[[;#569cd5;]' + string + ']';
+            // No highlight
+            return string;
+          }).join('');
+        });
       });
     }
 
@@ -182,6 +206,8 @@
     function update_autocomplete(text) {
       // Update options array
       autocomplete_options = text.split(" ");
+      // Add commands to keywords for highlighting
+      keywords = keywords.concat(autocomplete_options).filter(unique);
       // If there is any option, show options
       if (autocomplete_options.length > 0 &&
         myterm.get_command().trim().split(" ").pop() != text &&
@@ -190,6 +216,10 @@
       } else {
         $("#autocomplete").html("");
       }
+    }
+
+    function unique(value, index, self) {
+      return self.indexOf(value) === index;
     }
 
     $(document).ready(function () {
