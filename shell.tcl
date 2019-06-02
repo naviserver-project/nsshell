@@ -332,9 +332,12 @@ namespace eval ws::shell {
         #  - same as eval
         #  - return the result directly if status is ok
         :method internal_eval {arg kernel channel} {
-            set result [:eval $arg $kernel $channel]
-            if { [lindex $result 1] eq "ok" } {
-                return [lindex $result 3]
+            set checkErr [:eval "catch {$arg}" $kernel $channel]
+            if { [lindex $checkErr 1] eq "ok" && [lindex $checkErr 3] eq 0} {
+                set result [:eval $arg $kernel $channel]
+                if { [lindex $result 1] eq "ok" } {
+                    return [lindex $result 3]
+                }
             }
             return ""
         }
@@ -372,17 +375,12 @@ namespace eval ws::shell {
                     ns_log notice "Autocomplete subcommand: $arg"
                     # Get class/object name
                     set obj [lindex [split $arg " "] 0]
-                    # Check if class/obj existed
-                    set classes [:internal_eval "nx::Class info instances $obj" $kernel $channel]
-                    set objects [:internal_eval "nx::Object info instances $obj" $kernel $channel]    
-                    if {$obj in [concat $classes $objects]} {
-                        # Get method prefix
-                        set m_arg [lindex [split $arg " "] 1]
-                        # Get matched class/object methods
-                        set methods [:internal_eval "$obj info lookup methods $m_arg*" $kernel $channel]
-                        # Sort & unique
-                        set result [lsort -unique [concat $methods]]
-                    }
+                    # Get method prefix
+                    set m_arg [lindex [split $arg " "] 1]
+                    # Get matched class/object methods
+                    set methods [:internal_eval "$obj info lookup methods $m_arg*" $kernel $channel]
+                    # Sort & unique
+                    set result [lsort -unique [concat $methods]]
                 }
             }
             return [list status autocomplete result $result]
