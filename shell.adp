@@ -72,7 +72,15 @@
           },
           name: kernelName,
           height: 200,
-          prompt: "[[;yellow;]" + kernelName + "]" + "$ "
+          prompt: "[[;yellow;]" + kernelName + "]" + "$ ",
+          keydown: function (e) {
+            // Autocomplete when tab
+            if(e.key == "Tab") {
+              var command = myterm.get_command();
+              console.log(command);
+              return false;
+            }
+          }
         });
       });
     }
