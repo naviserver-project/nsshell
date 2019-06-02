@@ -357,12 +357,17 @@ namespace eval ws::shell {
             if { [llength [split $arg " "]] eq 2} {
                 # Get class/object name
                 set obj [lindex [split $arg " "] 0]
-                # Get method prefix
-                set m_arg [lindex [split $arg " "] 1]
-                # Get matched class/object methods
-                set methods [lindex [:eval "$obj info lookup methods $m_arg*" $kernel $channel] 3]
-                # Sort & unique
-                set result [lsort -unique [concat $methods]]
+                # Check if class/obj existed
+                set classes [lindex [:eval "nx::Class info instances $obj" $kernel $channel] 3]
+                set objects [lindex [:eval "nx::Object info instances $obj" $kernel $channel] 3]
+                if {$obj in [concat $classes $objects]} {
+                    # Get method prefix
+                    set m_arg [lindex [split $arg " "] 1]
+                    # Get matched class/object methods
+                    set methods [lindex [:eval "$obj info lookup methods $m_arg*" $kernel $channel] 3]
+                    # Sort & unique
+                    set result [lsort -unique [concat $methods]]
+                }
             }
             return [list status autocomplete result $result]
         }
