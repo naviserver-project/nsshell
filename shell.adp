@@ -39,6 +39,7 @@
       position: absolute;
       top: 14px;
       left: 0;
+      color: #555555;
     }
   </style>
 </head>
@@ -92,20 +93,32 @@
           name: kernelName,
           prompt: "[[;yellow;]" + kernelName + "]" + "$ ",
           keydown: function (e) {
-            // Get current command
-            var command = myterm.get_command().trimLeft();
             // If Tab, autocomplete
             if (e.key == "Tab") {
+              // Auto add ::
+              var is_namespace = true;
+              autocomplete_options.forEach(function (item) {
+                if (item.charAt(0) != ":") {
+                  is_namespace = false;
+                }
+              });
+              if (is_namespace && myterm.get_command().trimLeft().charAt(0) != ":")
+                myterm.set_command("::" + myterm.get_command().trimLeft());
+              // Auto complete
               myterm.complete(autocomplete_options);
-              command = myterm.get_command().trimLeft();
             }
+            // Get current command
+            var command = myterm.get_command().trimLeft();
             // Delete last char if key is backspace
             if (e.key == "Backspace") command = command.substring(0, command.length - 1);
             // Add lastest char in command
             if (e.key.length == 1) command += e.key;
-            // Get autocomplete options via websocket, look at function update_autocomplete()
+            // If command is blank, not run autocomplete & hide current option
             if (command.trim() != "")
+              // Get autocomplete options via websocket, look at function update_autocomplete()
               websocket.send(JSON.stringify(['autocomplete', command, kernelID]));
+            else
+              update_autocomplete("");
             // Ignore Tab key
             if (e.key == "Tab") {
               return false;
@@ -170,7 +183,9 @@
       // Update options array
       autocomplete_options = text.split(" ");
       // If there is any option, show options
-      if (autocomplete_options.length > 0 && myterm.get_command() != text && myterm.get_command() != "") {
+      if (autocomplete_options.length > 0 &&
+        myterm.get_command().trim().split(" ").pop() != text &&
+        myterm.get_command().trim() != "") {
         $("#autocomplete").html(text);
       } else {
         $("#autocomplete").html("");
