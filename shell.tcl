@@ -331,7 +331,7 @@ namespace eval ws::shell {
         :public method autocomplete {arg kernel channel} {
             ns_log notice "[current class] autocomplete command: $arg"
             set result ""
-            # Command autocomplete
+            # General command autocomplete
             if { [llength [split $arg " "]] eq 1} {
                 # Get matched commands list
                 set commands [info commands "$arg*"]
@@ -339,8 +339,15 @@ namespace eval ws::shell {
                 set class [nx::Class info instances "$arg*"]
                 # Sort & unique
                 set result [lsort -unique [concat $commands $class]]
-            } else {
-                puts "not command"
+            }
+            # Variable autocomplete
+            if { [string match "$*" [lindex [split $arg " "] end]] } {
+                # Get var prefix without $
+                set var_prefix [string range [lindex [split $arg " "] end] 1 end]
+                # Build info vars command
+                set e_args "info vars $var_prefix*"
+                # Eval command and set result
+                set result [lindex [:eval $e_args $kernel $channel] 3]
             }
             return [list status autocomplete result $result]
         }
