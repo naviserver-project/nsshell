@@ -57,6 +57,7 @@
     var myterm = $('#term_demo');
     var autocomplete_options = null;
     var wrapper = null;
+    var keywords = [];
 
     function init() {
       initializeTerminal();
@@ -142,7 +143,8 @@
             if (string.charAt(0) == "$")
               return '[[;#85dcf2;]' + string + ']';
             // Highlight command
-            // ...
+            if (keywords.indexOf(string) != -1)
+              return '[[;#569cd5;]' + string + ']';
             // No highlight
             return string;
           }).join('');
@@ -204,6 +206,8 @@
     function update_autocomplete(text) {
       // Update options array
       autocomplete_options = text.split(" ");
+      // Add commands to keywords for highlighting
+      keywords = keywords.concat(autocomplete_options).filter(unique);
       // If there is any option, show options
       if (autocomplete_options.length > 0 &&
         myterm.get_command().trim().split(" ").pop() != text &&
@@ -212,6 +216,10 @@
       } else {
         $("#autocomplete").html("");
       }
+    }
+
+    function unique(value, index, self) {
+      return self.indexOf(value) === index;
     }
 
     $(document).ready(function () {
