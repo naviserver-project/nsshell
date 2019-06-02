@@ -333,9 +333,12 @@ namespace eval ws::shell {
             set result ""
             # Command autocomplete
             if { [llength [split $arg " "]] eq 1} {
-                set commands [info command "$arg*"]
+                # Get matched commands list
+                set commands [info commands "$arg*"]
+                # Get matached class list, since some might not appear on info commands 
                 set class [nx::Class info instances "$arg*"]
-                set result [lsort [concat $commands $class]]
+                # Sort & unique
+                set result [lsort -unique [concat $commands $class]]
             } else {
                 puts "not command"
             }
