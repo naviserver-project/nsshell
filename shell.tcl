@@ -68,7 +68,7 @@ namespace eval ws::shell {
                 # ok but noreply 
                 noreply         {set reply ""}
                 # autocomplete
-                autocomplete    {set reply "myterm.echo('$result');"}          
+                autocomplete    {set reply "update_autocomplete('$result');"}          
             }
         } else {
             ns_log warning "command <$msg> not handled"

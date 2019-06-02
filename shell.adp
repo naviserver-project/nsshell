@@ -30,12 +30,22 @@
   </script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.4.1/js/jquery.terminal.min.js"></script>
+  <style>
+    #autocomplete {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      float: left;
+      position: absolute;
+      top: 14px;
+      left: 0;
+    }
+  </style>
 </head>
 
-<body role="document" style="background:black;">
+<body role="document" class="bg-black h-100 w-100">
 
   <div id="term_demo" class="w-100 h-100"></div>
-
   <script language="javascript" type="text/javascript">
     var wsUri = '<%= $wsUri %>';
     var kernelID = '<%= $kernelID %>';
@@ -44,6 +54,8 @@
     var state;
     var websocket = 0;
     var myterm = $('#term_demo');
+    var autocomplete_options = null;
+    var wrapper = null;
 
     function init() {
       initializeTerminal();
@@ -70,14 +82,30 @@
             this.echo('[[;white;]##################################]');
             myterm = this;
           },
+          onInit: function (term) {
+            // Get wrapper from terminal
+            wrapper = term.cmd().find('.cursor').wrap('<span/>').parent().addClass('cmd-wrapper');
+            // Add autocomplete span to wrapper
+            $("<span id='autocomplete'></span>").appendTo(wrapper);
+          },
           name: kernelName,
-          height: 200,
           prompt: "[[;yellow;]" + kernelName + "]" + "$ ",
           keydown: function (e) {
-            // Autocomplete when tab
-            if(e.key == "Tab") {
-              var command = myterm.get_command();
-              websocket.send(JSON.stringify(['autocomplete', command, kernelID]));
+            // Get current command
+            var command = myterm.get_command();
+            // If Tab, autocomplete
+            if (e.key == "Tab") {
+              myterm.complete(autocomplete_options);
+              command = myterm.get_command();
+            }
+            // Delete last char if key is backspace
+            if (e.key == "Backspace") command = command.substring(0, command.length - 1);
+            // Add lastest char in command
+            if (e.key.length == 1) command += e.key;
+            // Get autocomplete options via websocket, look at function update_autocomplete()
+            websocket.send(JSON.stringify(['autocomplete', command, kernelID]));
+            // Ignore Tab key
+            if (e.key == "Tab") {
               return false;
             }
           }
@@ -134,6 +162,17 @@
 
     function clearOutput() {
       myterm.clear();
+    }
+
+    function update_autocomplete(text) {
+      // Update options array
+      autocomplete_options = text.split(" ");
+      // If there is any option and the only option is not same as current command, show options
+      if (autocomplete_options.length > 0 && myterm.get_command() != text) {
+        $("#autocomplete").html(text);
+      } else {
+        $("#autocomplete").html("");
+      }
     }
 
     $(document).ready(function () {
