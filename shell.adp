@@ -70,6 +70,7 @@
           if (kernel === undefined) {
             kernel = '';
           }
+          command = command.trimLeft();
           if (command !== '') {
             websocket.send(JSON.stringify(['eval', command, kernel]));
           } else {
@@ -92,18 +93,19 @@
           prompt: "[[;yellow;]" + kernelName + "]" + "$ ",
           keydown: function (e) {
             // Get current command
-            var command = myterm.get_command();
+            var command = myterm.get_command().trimLeft();
             // If Tab, autocomplete
             if (e.key == "Tab") {
               myterm.complete(autocomplete_options);
-              command = myterm.get_command();
+              command = myterm.get_command().trimLeft();
             }
             // Delete last char if key is backspace
             if (e.key == "Backspace") command = command.substring(0, command.length - 1);
             // Add lastest char in command
             if (e.key.length == 1) command += e.key;
             // Get autocomplete options via websocket, look at function update_autocomplete()
-            websocket.send(JSON.stringify(['autocomplete', command, kernelID]));
+            if (command.trim() != "")
+              websocket.send(JSON.stringify(['autocomplete', command, kernelID]));
             // Ignore Tab key
             if (e.key == "Tab") {
               return false;
