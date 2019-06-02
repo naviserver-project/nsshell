@@ -330,7 +330,7 @@ namespace eval ws::shell {
 
         :public method autocomplete {arg kernel channel} {
             ns_log notice "[current class] autocomplete command: $arg"
-            set result ""
+            set result {}
             # General command autocomplete
             if { [llength [split $arg " "]] eq 1} {
                 # Get matched commands list
@@ -346,8 +346,12 @@ namespace eval ws::shell {
             if { [string match "$*" [lindex [split $arg " "] end]] } {
                 # Get var prefix without $
                 set var_prefix [string range [lindex [split $arg " "] end] 1 end]
-                # Eval command and set result
-                set result [lindex [:eval "info vars $var_prefix*" $kernel $channel] 3]
+                # Get matched variable
+                set var_result [lindex [:eval "info vars $var_prefix*" $kernel $channel] 3]
+                # Add prefix $ and save to result
+                foreach r $var_result {
+                    set result [concat $result "\$$r"]
+                }
             }
             return [list status autocomplete result $result]
         }
