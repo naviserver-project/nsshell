@@ -288,6 +288,7 @@ namespace eval ws::shell {
 
             # Add ns_conn proc to namespace
             namespace eval $kernel {
+                # Original "ns_conn" in kernel will return "no connection"
                 proc ns_conn {args} {
                     set kernel [lindex [split [namespace current] ::] 6]
                     if {[nsv_exists shell_conn "$kernel,$args"]} {
@@ -296,11 +297,10 @@ namespace eval ws::shell {
                         return -code error "bad option \"$args\": must be acceptedcompression, auth, authpassword, authuser, contentfile, contentlength, contentsentlength, driver, files, flags, form, headers, host, id, isconnected, location, method, outputheaders, peeraddr, peerport, pool, port, protocol, query, partialtimes, request, server, sock, start, timeout, url, urlc, urlv, version, or zipaccepted"
                     }
                 }
-            }
-            
-            # Change "puts ..." to "set {} ..." to make it echo value
-            if {[string first puts $arg ] == 0} {
-                set arg [string replace $arg 0 3 "set ${kernel}_output"]
+                # Original "puts" doesn't return anything
+                proc puts {text} {
+                    return $text
+                }
             }
 
             # Execute command in ws::shell::$kernel
@@ -311,7 +311,7 @@ namespace eval ws::shell {
                 # Copy variables back to thread
                 ns_log notice "[current class] copy variables back to thread"
                 foreach var [namespace eval $kernel info vars] {
-                    if {[lsearch ${reserveName} $var] == -1 && $var ne "${kernel}_output"} {
+                    if {$var ni $reserveName} {
                         if {[namespace eval $kernel array exists $var]} {
                             threadHandler eval "array set $var {[namespace eval $kernel array get $var]}" $kernel $channel
                             namespace eval $kernel array unset $var
@@ -319,9 +319,6 @@ namespace eval ws::shell {
                             threadHandler eval "set $var [namespace eval $kernel set {} $var]" $kernel $channel
                             namespace eval $kernel unset $var
                         }
-                    } elseif {$var eq "${kernel}_output"} {
-                        # Unset temp output
-                        namespace eval $kernel unset $var
                     }
                 }
                 return [list status ok result $result]
