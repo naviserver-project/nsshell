@@ -167,8 +167,8 @@
     function update_autocomplete(text) {
       // Update options array
       autocomplete_options = text.split(" ");
-      // If there is any option and the only option is not same as current command, show options
-      if (autocomplete_options.length > 0 && myterm.get_command() != text) {
+      // If there is any option, show options
+      if (autocomplete_options.length > 0 && myterm.get_command() != text && myterm.get_command() != "") {
         $("#autocomplete").html(text);
       } else {
         $("#autocomplete").html("");
