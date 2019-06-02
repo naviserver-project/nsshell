@@ -334,13 +334,13 @@ namespace eval ws::shell {
             # General command autocomplete
             if { [llength [split $arg " "]] eq 1} {
                 # Get matched commands list
-                #set commands [info commands "$arg*"]
                 set commands [lindex [:eval "info commands $arg*" $kernel $channel] 3]
-                # Get matached class list, since some might not appear on info commands 
-                #set class [nx::Class info instances "$arg*"]
-                set class [lindex [:eval "nx::Class info instances $arg*" $kernel $channel] 3]
+                # Get matched class list, since some might not appear on info commands 
+                set classes [lindex [:eval "nx::Class info instances $arg*" $kernel $channel] 3]
+                # Get matched object list, since some might not appear on info commands 
+                set objects [lindex [:eval "nx::Object info instances $arg*" $kernel $channel] 3]
                 # Sort & unique
-                set result [lsort -unique [concat $commands $class]]
+                set result [lsort -unique [concat $commands $classes $objects]]
             }
             # Variable autocomplete
             if { [string match "$*" [lindex [split $arg " "] end]] } {
