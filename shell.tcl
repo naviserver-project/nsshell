@@ -328,45 +328,61 @@ namespace eval ws::shell {
             }
         }
 
-        :public method autocomplete {arg kernel channel} {
-            ns_log notice "[current class] autocomplete command: $arg"
-            set result {}
-            # General command autocomplete
-            if { [llength [split $arg " "]] eq 1} {
-                # Get matched commands list
-                set commands [lindex [:eval "info commands $arg*" $kernel $channel] 3]
-                # Get matched class list, since some might not appear on info commands 
-                set classes [lindex [:eval "nx::Class info instances $arg*" $kernel $channel] 3]
-                # Get matched object list, since some might not appear on info commands 
-                set objects [lindex [:eval "nx::Object info instances $arg*" $kernel $channel] 3]
-                # Sort & unique
-                set result [lsort -unique [concat $commands $classes $objects]]
+        # Internal eval
+        #  - same as eval
+        #  - return the result directly if status is ok
+        :method internal_eval {arg kernel channel} {
+            set result [:eval $arg $kernel $channel]
+            if { [lindex $result 1] eq "ok" } {
+                return [lindex $result 3]
             }
+            return ""
+        }
+
+        # Autocomplete
+        #  - return the possible options
+        :public method autocomplete {arg kernel channel} {
+            set result {}
             # Variable autocomplete
             if { [string match "$*" [lindex [split $arg " "] end]] } {
+                ns_log notice "Autocomplete variable: $arg"
                 # Get var prefix without $
                 set var_prefix [string range [lindex [split $arg " "] end] 1 end]
                 # Get matched variable
-                set var_result [lindex [:eval "info vars $var_prefix*" $kernel $channel] 3]
+                set var_result [:internal_eval "info vars $var_prefix*" $kernel $channel]
                 # Add prefix $ and save to result
                 foreach r $var_result {
                     set result [concat $result "\$$r"]
                 }
-            }
-            # Class/Object method autocomplete
-            if { [llength [split $arg " "]] eq 2} {
-                # Get class/object name
-                set obj [lindex [split $arg " "] 0]
-                # Check if class/obj existed
-                set classes [lindex [:eval "nx::Class info instances $obj" $kernel $channel] 3]
-                set objects [lindex [:eval "nx::Object info instances $obj" $kernel $channel] 3]
-                if {$obj in [concat $classes $objects]} {
-                    # Get method prefix
-                    set m_arg [lindex [split $arg " "] 1]
-                    # Get matched class/object methods
-                    set methods [lindex [:eval "$obj info lookup methods $m_arg*" $kernel $channel] 3]
+            } else {
+                # General command autocomplete
+                if { [llength [split $arg " "]] eq 1} {
+                    ns_log notice "Autocomplete command: $arg"
+                    # Get matched commands list
+                    set commands [:internal_eval "info commands $arg*" $kernel $channel]
+                    # Get matched class list, since some might not appear on info commands 
+                    set classes [:internal_eval "nx::Class info instances $arg*" $kernel $channel]
+                    # Get matched object list, since some might not appear on info commands 
+                    set objects [:internal_eval "nx::Object info instances $arg*" $kernel $channel]
                     # Sort & unique
-                    set result [lsort -unique [concat $methods]]
+                    set result [lsort -unique [concat $commands $classes $objects]]
+                }
+                # Class/Object method autocomplete
+                if { [llength [split $arg " "]] eq 2} {
+                    ns_log notice "Autocomplete subcommand: $arg"
+                    # Get class/object name
+                    set obj [lindex [split $arg " "] 0]
+                    # Check if class/obj existed
+                    set classes [:internal_eval "nx::Class info instances $obj" $kernel $channel]
+                    set objects [:internal_eval "nx::Object info instances $obj" $kernel $channel]    
+                    if {$obj in [concat $classes $objects]} {
+                        # Get method prefix
+                        set m_arg [lindex [split $arg " "] 1]
+                        # Get matched class/object methods
+                        set methods [:internal_eval "$obj info lookup methods $m_arg*" $kernel $channel]
+                        # Sort & unique
+                        set result [lsort -unique [concat $methods]]
+                    }
                 }
             }
             return [list status autocomplete result $result]
