@@ -63,10 +63,12 @@ namespace eval ws::shell {
             ns_log notice "handler returned <$info>"
             set result [string map [list ' \\'] [dict get $info result]]
             switch [dict get $info status] {
-                ok          {set reply "myterm.echo('\[\[;#FFFFFF;\]$result\]');"}
-                error       {set reply "myterm.error('$result');"}     
+                ok              {set reply "myterm.echo('\[\[;#FFFFFF;\]$result\]');"}
+                error           {set reply "myterm.error('$result');"}     
                 # ok but noreply 
-                noreply    {set reply ""}          
+                noreply         {set reply ""}
+                # autocomplete
+                autocomplete    {set reply "myterm.echo('$result');"}          
             }
         } else {
             ns_log warning "command <$msg> not handled"
@@ -248,7 +250,7 @@ namespace eval ws::shell {
     #
     nx::Class create CurrentThreadHandler -superclass Handler {
         
-        :property {supported:1..n eval}
+        :property {supported:1..n {eval autocomplete}}
         
 
         :method init {} {
@@ -324,6 +326,20 @@ namespace eval ws::shell {
                 }
                 return [list status ok result $result]
             }
+        }
+
+        :public method autocomplete {arg kernel channel} {
+            ns_log notice "[current class] autocomplete command: $arg"
+            set result ""
+            # Command autocomplete
+            if { [llength [split $arg " "]] eq 1} {
+                set commands [info command "$arg*"]
+                set class [nx::Class info instances "$arg*"]
+                set result [lsort [concat $commands $class]]
+            } else {
+                puts "not command"
+            }
+            return [list status autocomplete result $result]
         }
     }
     CurrentThreadHandler create handler

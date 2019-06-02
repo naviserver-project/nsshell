@@ -77,7 +77,7 @@
             // Autocomplete when tab
             if(e.key == "Tab") {
               var command = myterm.get_command();
-              console.log(command);
+              websocket.send(JSON.stringify(['autocomplete', command, kernelID]));
               return false;
             }
           }
