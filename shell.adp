@@ -30,12 +30,23 @@
   </script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.4.1/js/jquery.terminal.min.js"></script>
+  <style>
+    #autocomplete {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      float: left;
+      position: absolute;
+      top: 14px;
+      left: 0;
+      color: #555555;
+    }
+  </style>
 </head>
 
-<body role="document" style="background:black;">
+<body role="document" class="bg-black h-100 w-100">
 
   <div id="term_demo" class="w-100 h-100"></div>
-
   <script language="javascript" type="text/javascript">
     var wsUri = '<%= $wsUri %>';
     var kernelID = '<%= $kernelID %>';
@@ -44,6 +55,8 @@
     var state;
     var websocket = 0;
     var myterm = $('#term_demo');
+    var autocomplete_options = null;
+    var wrapper = null;
 
     function init() {
       initializeTerminal();
@@ -58,6 +71,7 @@
           if (kernel === undefined) {
             kernel = '';
           }
+          command = command.trimLeft();
           if (command !== '') {
             websocket.send(JSON.stringify(['eval', command, kernel]));
           } else {
@@ -70,9 +84,46 @@
             this.echo('[[;white;]##################################]');
             myterm = this;
           },
+          onInit: function (term) {
+            // Get wrapper from terminal
+            wrapper = term.cmd().find('.cursor').wrap('<span/>').parent().addClass('cmd-wrapper');
+            // Add autocomplete span to wrapper
+            $("<span id='autocomplete'></span>").appendTo(wrapper);
+          },
           name: kernelName,
-          height: 200,
-          prompt: "[[;yellow;]" + kernelName + "]" + "$ "
+          prompt: "[[;yellow;]" + kernelName + "]" + "$ ",
+          keydown: function (e) {
+            // If Tab, autocomplete
+            if (e.key == "Tab") {
+              // Auto add ::
+              var is_namespace = true;
+              autocomplete_options.forEach(function (item) {
+                if (item.charAt(0) != ":") {
+                  is_namespace = false;
+                }
+              });
+              if (is_namespace && myterm.get_command().trimLeft().charAt(0) != ":")
+                myterm.set_command("::" + myterm.get_command().trimLeft());
+              // Auto complete
+              myterm.complete(autocomplete_options);
+            }
+            // Get current command
+            var command = myterm.get_command().trimLeft();
+            // Delete last char if key is backspace
+            if (e.key == "Backspace") command = command.substring(0, command.length - 1);
+            // Add lastest char in command
+            if (e.key.length == 1) command += e.key;
+            // If command is blank, not run autocomplete & hide current option
+            if (command.trim() != "")
+              // Get autocomplete options via websocket, look at function update_autocomplete()
+              websocket.send(JSON.stringify(['autocomplete', command, kernelID]));
+            else
+              update_autocomplete("");
+            // Ignore Tab key
+            if (e.key == "Tab") {
+              return false;
+            }
+          }
         });
       });
     }
@@ -126,6 +177,19 @@
 
     function clearOutput() {
       myterm.clear();
+    }
+
+    function update_autocomplete(text) {
+      // Update options array
+      autocomplete_options = text.split(" ");
+      // If there is any option, show options
+      if (autocomplete_options.length > 0 &&
+        myterm.get_command().trim().split(" ").pop() != text &&
+        myterm.get_command().trim() != "") {
+        $("#autocomplete").html(text);
+      } else {
+        $("#autocomplete").html("");
+      }
     }
 
     $(document).ready(function () {

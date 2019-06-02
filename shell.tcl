@@ -63,10 +63,12 @@ namespace eval ws::shell {
             ns_log notice "handler returned <$info>"
             set result [string map [list ' \\'] [dict get $info result]]
             switch [dict get $info status] {
-                ok          {set reply "myterm.echo('\[\[;#FFFFFF;\]$result\]');"}
-                error       {set reply "myterm.error('$result');"}     
+                ok              {set reply "myterm.echo('\[\[;#FFFFFF;\]$result\]');"}
+                error           {set reply "myterm.error('$result');"}     
                 # ok but noreply 
-                noreply    {set reply ""}          
+                noreply         {set reply ""}
+                # autocomplete
+                autocomplete    {set reply "update_autocomplete('$result');"}          
             }
         } else {
             ns_log warning "command <$msg> not handled"
@@ -248,7 +250,7 @@ namespace eval ws::shell {
     #
     nx::Class create CurrentThreadHandler -superclass Handler {
         
-        :property {supported:1..n eval}
+        :property {supported:1..n {eval autocomplete}}
         
 
         :method init {} {
@@ -286,6 +288,7 @@ namespace eval ws::shell {
 
             # Add ns_conn proc to namespace
             namespace eval $kernel {
+                # Original "ns_conn" in kernel will return "no connection"
                 proc ns_conn {args} {
                     set kernel [lindex [split [namespace current] ::] 6]
                     if {[nsv_exists shell_conn "$kernel,$args"]} {
@@ -294,11 +297,10 @@ namespace eval ws::shell {
                         return -code error "bad option \"$args\": must be acceptedcompression, auth, authpassword, authuser, contentfile, contentlength, contentsentlength, driver, files, flags, form, headers, host, id, isconnected, location, method, outputheaders, peeraddr, peerport, pool, port, protocol, query, partialtimes, request, server, sock, start, timeout, url, urlc, urlv, version, or zipaccepted"
                     }
                 }
-            }
-            
-            # Change "puts ..." to "set {} ..." to make it echo value
-            if {[string first puts $arg ] == 0} {
-                set arg [string replace $arg 0 3 "set ${kernel}_output"]
+                # Original "puts" doesn't return anything
+                proc puts {text} {
+                    return $text
+                }
             }
 
             # Execute command in ws::shell::$kernel
@@ -309,7 +311,7 @@ namespace eval ws::shell {
                 # Copy variables back to thread
                 ns_log notice "[current class] copy variables back to thread"
                 foreach var [namespace eval $kernel info vars] {
-                    if {[lsearch ${reserveName} $var] == -1 && $var ne "${kernel}_output"} {
+                    if {$var ni $reserveName} {
                         if {[namespace eval $kernel array exists $var]} {
                             threadHandler eval "array set $var {[namespace eval $kernel array get $var]}" $kernel $channel
                             namespace eval $kernel array unset $var
@@ -317,13 +319,68 @@ namespace eval ws::shell {
                             threadHandler eval "set $var [namespace eval $kernel set {} $var]" $kernel $channel
                             namespace eval $kernel unset $var
                         }
-                    } elseif {$var eq "${kernel}_output"} {
-                        # Unset temp output
-                        namespace eval $kernel unset $var
                     }
                 }
                 return [list status ok result $result]
             }
+        }
+
+        # Internal eval
+        #  - same as eval
+        #  - return the result directly if status is ok
+        :method internal_eval {arg kernel channel} {
+            set checkErr [:eval "catch {$arg}" $kernel $channel]
+            if { [lindex $checkErr 1] eq "ok" && [lindex $checkErr 3] eq 0} {
+                set result [:eval $arg $kernel $channel]
+                if { [lindex $result 1] eq "ok" } {
+                    return [lindex $result 3]
+                }
+            }
+            return ""
+        }
+
+        # Autocomplete
+        #  - return the possible options
+        :public method autocomplete {arg kernel channel} {
+            set result {}
+            # Variable autocomplete
+            if { [string match "$*" [lindex [split $arg " "] end]] } {
+                ns_log notice "Autocomplete variable: $arg"
+                # Get var prefix without $
+                set var_prefix [string range [lindex [split $arg " "] end] 1 end]
+                # Get matched variable
+                set var_result [:internal_eval "info vars $var_prefix*" $kernel $channel]
+                # Add prefix $ and save to result
+                foreach r $var_result {
+                    set result [concat $result "\$$r"]
+                }
+            } else {
+                # General command autocomplete
+                if { [llength [split $arg " "]] eq 1} {
+                    ns_log notice "Autocomplete command: $arg"
+                    # Get matched commands list
+                    set commands [:internal_eval "info commands $arg*" $kernel $channel]
+                    # Get matched class list, since some might not appear on info commands 
+                    set classes [:internal_eval "nx::Class info instances $arg*" $kernel $channel]
+                    # Get matched object list, since some might not appear on info commands 
+                    set objects [:internal_eval "nx::Object info instances $arg*" $kernel $channel]
+                    # Sort & unique
+                    set result [lsort -unique [concat $commands $classes $objects]]
+                }
+                # Class/Object method autocomplete
+                if { [llength [split $arg " "]] eq 2} {
+                    ns_log notice "Autocomplete subcommand: $arg"
+                    # Get class/object name
+                    set obj [lindex [split $arg " "] 0]
+                    # Get method prefix
+                    set m_arg [lindex [split $arg " "] 1]
+                    # Get matched class/object methods
+                    set methods [:internal_eval "$obj info lookup methods $m_arg*" $kernel $channel]
+                    # Sort & unique
+                    set result [lsort -unique [concat $methods]]
+                }
+            }
+            return [list status autocomplete result $result]
         }
     }
     CurrentThreadHandler create handler
