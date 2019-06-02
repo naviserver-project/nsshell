@@ -125,6 +125,17 @@
             }
           }
         });
+
+        // Syntax Highlight
+        $.terminal.defaults.formatters.push(function (string) {
+          return string.split(/((?:\s|&nbsp;)+)/).map(function (string) {
+            // Highlight variable
+            if(string.charAt(0) == "$")
+              return '[[;#85dcf2;]' + string + ']';
+            else
+              return string;
+          }).join('');
+        });
       });
     }
 
