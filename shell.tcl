@@ -334,9 +334,11 @@ namespace eval ws::shell {
             # General command autocomplete
             if { [llength [split $arg " "]] eq 1} {
                 # Get matched commands list
-                set commands [info commands "$arg*"]
+                #set commands [info commands "$arg*"]
+                set commands [lindex [:eval "info commands $arg*" $kernel $channel] 3]
                 # Get matached class list, since some might not appear on info commands 
-                set class [nx::Class info instances "$arg*"]
+                #set class [nx::Class info instances "$arg*"]
+                set class [lindex [:eval "nx::Class info instances $arg*" $kernel $channel] 3]
                 # Sort & unique
                 set result [lsort -unique [concat $commands $class]]
             }
@@ -344,10 +346,8 @@ namespace eval ws::shell {
             if { [string match "$*" [lindex [split $arg " "] end]] } {
                 # Get var prefix without $
                 set var_prefix [string range [lindex [split $arg " "] end] 1 end]
-                # Build info vars command
-                set e_args "info vars $var_prefix*"
                 # Eval command and set result
-                set result [lindex [:eval $e_args $kernel $channel] 3]
+                set result [lindex [:eval "info vars $var_prefix*" $kernel $channel] 3]
             }
             return [list status autocomplete result $result]
         }
