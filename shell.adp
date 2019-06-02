@@ -128,12 +128,23 @@
 
         // Syntax Highlight
         $.terminal.defaults.formatters.push(function (string) {
+          var quote = "";
           return string.split(/((?:\s|&nbsp;)+)/).map(function (string) {
+            // Highlight quotes
+            if (quote != "") {
+              if (string.charAt(string.length - 1) == quote) quote = "";
+              return '[[;#cd9078;]' + string + ']';
+            } else if (string.charAt(0) == "\"" || string.charAt(0) == "'") {
+              quote = string.charAt(0);
+              return '[[;#cd9078;]' + string + ']';
+            }
             // Highlight variable
-            if(string.charAt(0) == "$")
+            if (string.charAt(0) == "$")
               return '[[;#85dcf2;]' + string + ']';
-            else
-              return string;
+            // Highlight command
+            // ...
+            // No highlight
+            return string;
           }).join('');
         });
       });
