@@ -183,7 +183,7 @@
 
     function onMessage(evt) {
       if (evt.data == "") return;
-      var result = window.eval(evt.data);
+      var result = window.eval(evt.data.split("\n").join("\\n"));
       $('html, body').scrollTop($(document).height());
     }
 
