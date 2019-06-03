@@ -54,7 +54,7 @@
     var output;
     var state;
     var websocket = 0;
-    var myterm = $('#term_demo');
+    var myterm = null;
     var autocomplete_options = null;
     var wrapper = null;
     var keywords = [];
@@ -107,23 +107,21 @@
                 myterm.set_command("::" + myterm.get_command().trimLeft());
               // Auto complete
               myterm.complete(autocomplete_options);
+              return false;
             }
-            // Get current command
-            var command = myterm.get_command().trimLeft();
-            // Delete last char if key is backspace
-            if (e.key == "Backspace") command = command.substring(0, command.length - 1);
-            // Add lastest char in command
-            if (e.key.length == 1) command += e.key;
+          },
+          onCommandChange: function (command, term) {
+            // Show autocomplete options when command change
+            //subcommand = command.split("[");
+            //command = subcommand[subcommand.length-1];
+            // Trim whitespace
+            command = command.trimLeft();
             // If command is blank, not run autocomplete & hide current option
             if (command.trim() != "")
               // Get autocomplete options via websocket, look at function update_autocomplete()
               websocket.send(JSON.stringify(['autocomplete', command, kernelID]));
             else
               update_autocomplete("");
-            // Ignore Tab key
-            if (e.key == "Tab") {
-              return false;
-            }
           }
         });
 
@@ -204,6 +202,7 @@
     }
 
     function update_autocomplete(text) {
+      if (myterm == null) return;
       // Update options array
       autocomplete_options = text.split(" ");
       // Add commands to keywords for highlighting
