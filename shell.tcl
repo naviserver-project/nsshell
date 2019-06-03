@@ -290,12 +290,15 @@ namespace eval ws::shell {
             # Execute command in ws::shell::$kernel
             ns_log notice "ws::shell::$kernel evals <$arg>"
             if {[catch {set result [namespace eval $kernel $arg]} errorMsg]} {
+                # Delete temporary namespace
+                namespace delete $kernel
+                # Return result
                 return [list status error result $errorMsg]
             } else {
                 # Dump a snapshot and save a dump text to thread
                 set t_arg "set snapshot \[list [split [namespace eval $kernel snapshot dump] "\n"]\]"
                 threadHandler eval $t_arg $kernel $channel
-                # Delete the temporary namespace
+                # Delete temporary namespace
                 namespace delete $kernel
                 # Return result
                 return [list status ok result $result]
