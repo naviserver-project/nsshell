@@ -28,7 +28,7 @@ namespace eval ws::snapshot {
             #
             # Filter slot objects
             #
-            if {[string match *${:namespace}::slot::* $o]
+            if {[string match *::slot::* $o]
                 || [::nx::isSlotContainer $o]
             } continue
             set o
