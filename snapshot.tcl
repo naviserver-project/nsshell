@@ -1,27 +1,34 @@
 package req nx
 package req nx::serializer
 
-namespace eval ws_manager {
+namespace eval ws::snapshot {
     nx::Class create Snapshot {
         #
         # Collect the following types of things in the workspace
         #
         :property {elements {
-            global-vars nx-objects
+            vars nx-objects
         }}
+
+        #
+        # Set namespace to collect, global by default
+        #
+        :property {namespace ""}
 
         #
         # collector methods
         # 
-        :method "collect global-vars" {} {
-            return [info vars ::*]
+        :method "collect vars" {} {
+            # Get vars from specified namespace
+            return [info vars "${:namespace}::*"]
         }
         :method "collect nx-objects" {} {
-            return [lmap o [nx::Object info instances -closure] {
+            # Get objects from specified namespace
+            return [lmap o [nx::Object info instances -closure ${:namespace}::*] {
             #
             # Filter slot objects
             #
-            if {[string match *::slot::* $o]
+            if {[string match *${:namespace}::slot::* $o]
                 || [::nx::isSlotContainer $o]
             } continue
             set o
@@ -36,7 +43,7 @@ namespace eval ws_manager {
         #
         # save methods
         #
-        :method "save global-vars" {vars} {
+        :method "save vars" {vars} {
             set result ""
             foreach e $vars {
             append result [list set $e [set $e]] \n
@@ -68,8 +75,6 @@ namespace eval ws_manager {
             }
             return $diff
         }
-
-        
         #
         # Return a Tcl command which can be evaluated to reconstuct
         # the difference between the start of the snapshot and the
@@ -87,6 +92,5 @@ namespace eval ws_manager {
         :method init {} {
             set :start [:collect all]
         }
-
     }
 }
