@@ -264,31 +264,9 @@ namespace eval ws::shell {
             nsv_set shell_kernels $kernel [list $channel [ns_time]]
             nsv_set shell_conn $kernel,channel $channel
 
-            # Copy object variables from thread into this method
-            ns_log notice "[current class] copy variables from thread"
-            set reserveName {tcl_version tcl_interactive auto_path errorCode errorInfo auto_index env tcl_pkgPath tcl_patchLevel tcl_platform tcl_library}
-            set vars [lindex [threadHandler eval "info vars" $kernel $channel] 3]
-            foreach var $vars {
-                if {[lsearch ${reserveName} $var] == -1} { 
-                    if {[lindex [threadHandler eval "array exists $var" $kernel $channel] 3]} {
-                        set cmd "array set $var {[lindex [threadHandler eval "array get $var" $kernel $channel] 3]}"
-                        namespace eval $kernel $cmd
-                    } else {
-                        namespace eval $kernel set $var [lindex [threadHandler eval "set $var" $kernel $channel] 3]
-                    }
-                }
-            }
-
-            # Original
-            #if {[catch {
-            #    return [list status ok result [namespace eval :: $arg]]
-            #} errorMsg]} {
-            #    return [list status error result $errorMsg]
-            #}
-
-            # Add ns_conn proc to namespace
+            # Create temporary namespace for executing command in current thread
             namespace eval $kernel {
-                # Original "ns_conn" in kernel will return "no connection"
+                # Create substitute "ns_conn", since original "ns_conn" in kernel will return "no connection"
                 proc ns_conn {args} {
                     set kernel [lindex [split [namespace current] ::] 6]
                     if {[nsv_exists shell_conn "$kernel,$args"]} {
@@ -297,30 +275,29 @@ namespace eval ws::shell {
                         return -code error "bad option \"$args\": must be acceptedcompression, auth, authpassword, authuser, contentfile, contentlength, contentsentlength, driver, files, flags, form, headers, host, id, isconnected, location, method, outputheaders, peeraddr, peerport, pool, port, protocol, query, partialtimes, request, server, sock, start, timeout, url, urlc, urlv, version, or zipaccepted"
                     }
                 }
-                # Original "puts" doesn't return anything
+                # Create substitute "puts", since original "puts" doesn't return anything
                 proc puts {text} {
                     return $text
                 }
+                # Create snapshot
+                ::ws::snapshot::Snapshot create snapshot -namespace [namespace current]
             }
+
+            # Restore snapshot
+            set snapshots [lindex [threadHandler eval "puts \$snapshot" $kernel $channel] 3]
+            namespace eval $kernel [join $snapshots "\n"]
 
             # Execute command in ws::shell::$kernel
             ns_log notice "ws::shell::$kernel evals <$arg>"
             if {[catch {set result [namespace eval $kernel $arg]} errorMsg]} {
                 return [list status error result $errorMsg]
             } else {
-                # Copy variables back to thread
-                ns_log notice "[current class] copy variables back to thread"
-                foreach var [namespace eval $kernel info vars] {
-                    if {$var ni $reserveName} {
-                        if {[namespace eval $kernel array exists $var]} {
-                            threadHandler eval "array set $var {[namespace eval $kernel array get $var]}" $kernel $channel
-                            namespace eval $kernel array unset $var
-                        } else {
-                            threadHandler eval "set $var [namespace eval $kernel set {} $var]" $kernel $channel
-                            namespace eval $kernel unset $var
-                        }
-                    }
-                }
+                # Dump a snapshot and save a dump text to thread
+                set t_arg "set snapshot \[list [split [namespace eval $kernel snapshot dump] "\n"]\]"
+                threadHandler eval $t_arg $kernel $channel
+                # Delete the temporary namespace
+                namespace delete $kernel
+                # Return result
                 return [list status ok result $result]
             }
         }
@@ -419,7 +396,13 @@ namespace eval ws::shell {
                 ns_log notice "Kernel thread creates kernel (= interp) '$name'"
                 kernels do [list interp create $name]
                 # autoload nx, should be generalized
-                kernels do [list interp eval $name package require nx]
+                kernels do [list interp eval $name {
+                    package require nx
+                    proc puts {text} {
+                        return $text
+                    }
+                    set snapshot ""
+                }]
                 lappend :kernels $name
             }
         }
