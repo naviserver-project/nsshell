@@ -330,10 +330,18 @@ namespace eval ws::shell {
                 set var_prefix [string range [lindex [split $arg " "] end] 1 end]
                 # Get matched variable
                 set var_result [:internal_eval "info vars $var_prefix*" $kernel $channel]
+                # Get matched namepace
+                set namespace_parent [join [lreplace [split $var_prefix :] end-1 end] ::]
+                set namespace_pattern [lindex [split $var_prefix :] end]
+                set namespace_result [:internal_eval "namespace children ${namespace_parent}:: $namespace_pattern*" $kernel $channel]
                 # Add prefix $ and save to result
                 foreach r $var_result {
                     set result [concat $result "\$$r"]
                 }
+                foreach n $namespace_result {
+                    set result [concat $result "\$${n}::"]
+                }
+                lsort -unique $result
             } else {
                 # General command autocomplete
                 if { [llength [split $arg " "]] eq 1} {
