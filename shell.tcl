@@ -252,7 +252,7 @@ namespace eval ws::shell {
     #
     nx::Class create CurrentThreadHandler -superclass Handler {
         
-        :property {supported:1..n {eval autocomplete}}
+        :property {supported:1..n {eval autocomplete heartbeat}}
         
 
         :method init {} {
@@ -263,7 +263,7 @@ namespace eval ws::shell {
         :public method eval {arg kernel channel} {
 
             # Update lastest kernel used
-            nsv_set shell_kernels $kernel [list $channel [ns_time]]
+            nsv_set shell_kernels $kernel [ns_time]
             nsv_set shell_conn $kernel,channel $channel
 
             # Create temporary namespace for executing command in current thread
@@ -364,6 +364,13 @@ namespace eval ws::shell {
             }
             return [list status autocomplete result $result]
         }
+
+        # Update kernel heartbeat
+        :public method heartbeat {kernel channel} {
+            ns_log notice "Shell heartbeat: $kernel"
+            nsv_set shell_kernels $kernel [ns_time]
+            return [list status noreply result ""]
+        }
     }
     CurrentThreadHandler create handler
 
@@ -450,18 +457,14 @@ namespace eval ws::shell {
     }
     KernelThreadHandler create threadHandler
 
+    # Set shell heartbeat
+    set shell_heartbeat 3000
     # Clear dead kernels every 10 second
     ns_schedule_proc 10 {
         array set kernels [nsv_array get shell_kernels]
         foreach name [array names kernels] {
-            set is_alive 0
-            foreach conn [ns_connchan list] {
-                if { [lindex $conn 0] eq [lindex $kernels($name) 0] } {
-                    set is_alive 1
-                    break
-                }
-            }
-            if {$is_alive eq 0} {
+            # Delete kernel if no heartbeat more than 10s
+            if { [expr {[ns_time] - $kernels($name)}] > 10} {
                 ::ws::shell::kernels do [list interp delete $name]
                 nsv_unset shell_kernels $name
                 foreach key [nsv_array names shell_conn] {

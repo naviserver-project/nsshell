@@ -183,6 +183,7 @@
 
     function onOpen(evt) {
       myterm.echo('[[;lightgreen;]Kernel "' + kernelName + '" is connected.]');
+      heartbeat();
     }
 
     function onClose(evt) {
@@ -230,6 +231,14 @@
 
     function unique(value, index, self) {
       return self.indexOf(value) === index;
+    }
+
+    function heartbeat() {
+      websocket.send(JSON.stringify(['heartbeat', kernelID]));
+      // Send heartbeat every 3s
+      setTimeout(function(){ 
+        heartbeat();
+      }, <%= $::ws::shell::shell_heartbeat %>);
     }
 
     $(document).ready(function () {
