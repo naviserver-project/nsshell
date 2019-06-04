@@ -18,7 +18,6 @@
    } else {
     ns_returnredirect [ns_conn location]/$shellUrl/kernel/$kernelID 
    }
-   puts $kernelID
 
    # Set ns_conn global variable for this kernel
    set conn_commands [list acceptedcompression auth authpassword authuser contentfile contentlength contentsentlength driver files flags form headers host id isconnected location method outputheaders peeraddr peerport pool port protocol query partialtimes request server sock start timeout url urlc urlv version zipaccepted]
