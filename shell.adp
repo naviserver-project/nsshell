@@ -7,7 +7,7 @@
    set wsUri $wsProtocol://$baseUrl/connect
 
    # Generate kernelID
-   set kernelID [ns_sha1 naviserver_shell_[ns_conn id]]
+   set kernelID [ns_uuid]
    # If kernel is specified
    if {[lindex [split [string map [list /$shellUrl ""] [ns_conn url]] /] 1] eq "kernel"} {
     set kernelID [string trim [string map [list /$shellUrl/kernel ""] [ns_conn url]] "/"]
