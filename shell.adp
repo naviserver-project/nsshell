@@ -13,7 +13,7 @@
     set kernelID [string trim [string map [list /$shellUrl/kernel ""] [ns_conn url]] "/"]
     # KernelID cannot empty
     if {[string trim $kernelID] eq ""} {
-      ns_returnredirect [ns_conn protocol]://$baseUrl
+      ns_returnredirect [ns_conn location]/$shellUrl
     }
    } else {
     ns_returnredirect [ns_conn location]/$shellUrl/kernel/$kernelID 
