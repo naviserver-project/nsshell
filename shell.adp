@@ -1,13 +1,24 @@
 <!DOCTYPE html>
 <%
-   set host [ns_info hostname]
-   set host localhost   
-   #set host "192.168.0.131"   
+   set host [lindex [split [ns_conn location] "/"] 2]
    set wsProtocol [expr {[ns_conn protocol] eq "http" ? "ws" : "wss"}]
-   set port [ns_config [ns_driversection] port [ns_conn port]]
-   set baseUrl [string trimright $host:$port/[ns_conn url]]
+   set shellUrl [string map {"/" ""} [ns_config ns/server/[ns_info server]/module/websocket/shell urls]]
+   set baseUrl [string trimright $host/$shellUrl]
    set wsUri $wsProtocol://$baseUrl/connect
+
+   # Generate kernelID
    set kernelID [ns_sha1 naviserver_shell_[ns_conn id]]
+   # If kernel is specified
+   if {[lindex [split [string map [list /$shellUrl ""] [ns_conn url]] /] 1] eq "kernel"} {
+    set kernelID [string trim [string map [list /$shellUrl/kernel ""] [ns_conn url]] "/"]
+    # KernelID cannot empty
+    if {[string trim $kernelID] eq ""} {
+      ns_returnredirect [ns_conn protocol]://$baseUrl
+    }
+   } else {
+    ns_returnredirect [ns_conn location]/$shellUrl/kernel/$kernelID 
+   }
+   puts $kernelID
 
    # Set ns_conn global variable for this kernel
    set conn_commands [list acceptedcompression auth authpassword authuser contentfile contentlength contentsentlength driver files flags form headers host id isconnected location method outputheaders peeraddr peerport pool port protocol query partialtimes request server sock start timeout url urlc urlv version zipaccepted]
@@ -18,7 +29,7 @@
 <html>
 
 <head>
-  <title>mini term</title>
+  <title>NaviServer shell</title>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"

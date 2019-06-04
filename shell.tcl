@@ -22,10 +22,12 @@ if {$urls eq ""} {
 #
 foreach url $urls {
     ns_log notice "websocket: shell available under $url"
-    ns_register_adp  GET $url [file dirname [info script]]/shell.adp
+    ns_register_adp -noinherit GET $url [file dirname [info script]]/shell.adp
+    # For shell with specific kernel
+    ns_register_adp GET $url/kernel/ [file dirname [info script]]/shell.adp
     # For ns_conn
     # ns_register_tcl  GET $url/conn [file dirname [info script]]/shell-conn.tcl
-    ns_register_proc GET $url/connect ::ws::shell::connect
+    ns_register_proc -noinherit GET $url/connect ::ws::shell::connect
 }
 
 namespace eval ws::shell {
