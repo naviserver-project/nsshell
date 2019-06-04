@@ -218,6 +218,13 @@
       autocomplete_options = text.split(" ");
       // Add commands to keywords for highlighting
       keywords = keywords.concat(autocomplete_options).filter(unique);
+      // Add '[' if nessessary
+      if (myterm.get_command().trim().split(" ").pop().charAt(0) == '[') {
+        console.log(autocomplete_options.length);
+        for (var i = 0; i < autocomplete_options.length; i++)
+          autocomplete_options[i] = "[" + autocomplete_options[i];
+      }
+      console.log(autocomplete_options);
       // If there is any option, show options
       if (autocomplete_options.length > 0 &&
         myterm.get_command().trim().split(" ").pop() != text &&
@@ -235,9 +242,9 @@
     function heartbeat() {
       websocket.send(JSON.stringify(['heartbeat', kernelID]));
       // Send heartbeat every 3s
-      setTimeout(function(){ 
+      setTimeout(function () {
         heartbeat();
-      }, <%= $::ws::shell::shell_heartbeat %>);
+      }, "<%= $::ws::shell::shell_heartbeat %>" );
     }
 
     $(document).ready(function () {

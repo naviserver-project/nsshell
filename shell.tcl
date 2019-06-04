@@ -346,24 +346,25 @@ namespace eval ws::shell {
                 lsort -unique $result
             } else {
                 # General command autocomplete
-                if { [llength [split $arg " "]] eq 1} {
-                    ns_log notice "Autocomplete command: $arg"
+                set sub_arg [string trim [lindex [split $arg "\["] end]]
+                if { [llength [split $sub_arg " "]] eq 1} {
+                    ns_log notice "Autocomplete command: $sub_arg"
                     # Get matched commands list
-                    set commands [:internal_eval "info commands $arg*" $kernel $channel]
+                    set commands [:internal_eval "info commands $sub_arg*" $kernel $channel]
                     # Get matched class list, since some might not appear on info commands 
-                    set classes [:internal_eval "nx::Class info instances $arg*" $kernel $channel]
+                    set classes [:internal_eval "nx::Class info instances $sub_arg*" $kernel $channel]
                     # Get matched object list, since some might not appear on info commands 
-                    set objects [:internal_eval "nx::Object info instances $arg*" $kernel $channel]
+                    set objects [:internal_eval "nx::Object info instances $sub_arg*" $kernel $channel]
                     # Sort & unique
                     set result [lsort -unique [concat $commands $classes $objects]]
                 }
                 # Class/Object method autocomplete
-                if { [llength [split $arg " "]] eq 2} {
-                    ns_log notice "Autocomplete subcommand: $arg"
+                if { [llength [split $sub_arg " "]] eq 2} {
+                    ns_log notice "Autocomplete subcommand: $sub_arg"
                     # Get class/object name
-                    set obj [lindex [split $arg " "] 0]
+                    set obj [lindex [split $sub_arg " "] 0]
                     # Get method prefix
-                    set m_arg [lindex [split $arg " "] 1]
+                    set m_arg [lindex [split $sub_arg " "] 1]
                     # Get matched class/object methods
                     set methods [:internal_eval "$obj info lookup methods $m_arg*" $kernel $channel]
                     # Sort & unique
