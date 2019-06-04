@@ -23,10 +23,7 @@ if {$urls eq ""} {
 foreach url $urls {
     ns_log notice "websocket: shell available under $url"
     ns_register_adp -noinherit GET $url [file dirname [info script]]/shell.adp
-    # For shell with specific kernel
     ns_register_adp GET $url/kernel/ [file dirname [info script]]/shell.adp
-    # For ns_conn
-    # ns_register_tcl  GET $url/conn [file dirname [info script]]/shell-conn.tcl
     ns_register_proc -noinherit GET $url/connect ::ws::shell::connect
 }
 
@@ -346,7 +343,7 @@ namespace eval ws::shell {
                 lsort -unique $result
             } else {
                 # General command autocomplete
-                set sub_arg [string trim [lindex [split $arg "\["] end]]
+                set sub_arg [string trimleft [lindex [split $arg "\["] end]]
                 if { [llength [split $sub_arg " "]] eq 1} {
                     ns_log notice "Autocomplete command: $sub_arg"
                     # Get matched commands list
