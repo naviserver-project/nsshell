@@ -35,11 +35,14 @@
     crossorigin="anonymous">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.4.1/css/jquery.terminal.min.css"
     rel="stylesheet" />
+  <link href="<%= [ns_conn location] %>/prism.css" rel="stylesheet" />
   <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" crossorigin="anonymous">
   </script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.4.1/js/jquery.terminal.min.js"></script>
+  <script src="<%= [ns_conn location] %>/prism.js"></script>
+  <script src="<%= [ns_conn location] %>/prism_term.js"></script>
   <style>
     #autocomplete {
       list-style: none;
@@ -136,7 +139,6 @@
               update_autocomplete("");
           }
         });
-
         // Syntax Highlight
         $.terminal.defaults.formatters.push(function (string) {
           // After execute, command will start with "$ "
@@ -148,63 +150,8 @@
             s.shift();
             string = s.join(" ");
           }
-          // Formatting
-          var quote = false;
-          var quote_stack = 0;
-          var command = true;
-          var variable = false;
-          var escape = false;
-          var out = prefix + string.split(/(\$|&#91;|&#93;|\"|(?:\s|&nbsp;)+)/).map(function (string) {
-            if(string.length == 0) return string;
-            //console.log(string + " (" + string.length + ")");
-
-            // Escape
-            //if(string=="\\")return "\\";
-            //if(escape) escape = false;
-            //if(string == "\\") escape = true;
-            // Variable Highlight
-            if(variable){
-              variable = false;
-              command = false;
-              return '[[;#85dcf2;]' + string + ']';
-            }
-            else if(string.trim() == "$") {
-              variable = true;
-              return '[[;#85dcf2;]' + string + ']';
-            }
-            // Quote Highlight
-            if(quote){
-              if(string == "&#91;") {
-                quote_stack++;
-                return '[[;#569cd5;]' + string + ']';
-              }
-              if(string == "&#93;") {
-                quote_stack--;
-                return '[[;#569cd5;]' + string + ']';
-              }
-              if(string == '"' && quote_stack == 0) quote = false;
-              return '[[;#cd9078;]' + string + ']';
-            }
-            else if (string == '"') {
-              quote = true;
-              quote_stack = 0;
-              return '[[;#cd9078;]' + string + ']';
-            }
-            // Command Highlight
-            if(command && string.trim().length > 0 && string != "&#91;") {
-              command = false;
-              if(string != "&#93;") return '[[;#569cd5;]' + string + ']';
-              return string;
-            }
-            else if (string == "&#91;") {
-              command = true;
-              return string;
-            }
-            // No highlight
-            return string;
-          }).join('');
-          console.log(out);
-          return out;
+          // Highlight command
+          return prefix+$.terminal.prism("tcl",$.terminal.escape_brackets(string));
         });
       });
     }
