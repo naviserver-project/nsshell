@@ -64,10 +64,8 @@ namespace eval ws::shell {
             set result [string map [list ' \\'] [dict get $info result]]
             switch [dict get $info status] {
                 ok              {set reply "myterm.echo('\[\[;#FFFFFF;\]$result\]');"}
-                error           {set reply "myterm.error('$result');"}     
-                # Santiphap: ok but noreply 
+                error           {set reply "myterm.error('$result');"}
                 noreply         {set reply ""}
-                # Santiphap: for autocomplete
                 autocomplete    {set reply "update_autocomplete('$result');"}          
             }
         } else {
@@ -476,15 +474,15 @@ namespace eval ws::shell {
     # Santiphap: KernelThreadHandler only uses for store snapshot for each kernel
     KernelThreadHandler create threadHandler
 
-    # Santiphap: Set shell heartbeat
-    set shell_heartbeat 3000
-    # Santiphap: Clear dead kernels every 10 second
-    ns_schedule_proc 10 {
+    # Santiphap: Clear dead kernels in interval
+    # - based param "kernel_timeout" in module
+    # - default 10s
+    ns_schedule_proc [ns_config ns/server/[ns_info server]/module/websocket/shell kernel_timeout 10] {
         array set kernels [nsv_array get shell_kernels]
         foreach name [array names kernels] {
             # Santiphap: Delete kernel if no heartbeat more than 10s
-            if { [expr {[ns_time] - $kernels($name)}] > 10} {
-                ::ws::shell::kernels do [list interp delete $name]
+            if { [expr {[ns_time] - $kernels($name)}] > [ns_config ns/server/[ns_info server]/module/websocket/shell kernel_timeout 10]} {
+                catch {::ws::shell::kernels do [list interp delete $name]}
                 nsv_unset shell_kernels $name
                 foreach key [nsv_array names shell_conn] {
                     if {$name eq [lindex [split $key ,] 0]} {

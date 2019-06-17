@@ -272,7 +272,7 @@
       // Send heartbeat every 3s
       setTimeout(function () {
         heartbeat();
-      }, "<%= $::ws::shell::shell_heartbeat %>");
+      }, parseFloat("<%= [ns_config ns/server/[ns_info server]/module/websocket/shell kernel_heartbeat 3] %>")*1000);
     }
 
     $(document).ready(function () {
