@@ -1,8 +1,8 @@
 #
 # shell.tcl 
 #
-#
-# Gustaf Neumann, April 2015
+# Santiphap Watcharasukchit, 11728213, June 2019 
+# original: miniterm from Gustaf Neumann, April 2015
 #
 package require nsf
 package require Thread
@@ -23,6 +23,7 @@ if {$urls eq ""} {
 foreach url $urls {
     ns_log notice "websocket: shell available under $url"
     ns_register_adp -noinherit GET $url [file dirname [info script]]/shell.adp
+    # Santiphap: For using shell with specific kernelId
     ns_register_adp GET $url/kernel/ [file dirname [info script]]/shell.adp
     ns_register_proc -noinherit GET $url/connect ::ws::shell::connect
 }
@@ -63,10 +64,8 @@ namespace eval ws::shell {
             set result [string map [list ' \\'] [dict get $info result]]
             switch [dict get $info status] {
                 ok              {set reply "myterm.echo('\[\[;#FFFFFF;\]$result\]');"}
-                error           {set reply "myterm.error('$result');"}     
-                # ok but noreply 
+                error           {set reply "myterm.error('$result');"}
                 noreply         {set reply ""}
-                # autocomplete
                 autocomplete    {set reply "update_autocomplete('$result');"}          
             }
         } else {
@@ -259,13 +258,13 @@ namespace eval ws::shell {
 
         :public method eval {arg kernel channel} {
 
-            # Update lastest kernel used
+            # Santiphap: Update kernel timestamp as well as latest channel
             nsv_set shell_kernels $kernel [ns_time]
             nsv_set shell_conn $kernel,channel $channel
 
-            # Create temporary namespace for executing command in current thread
+            # Santiphap: Create temporary namespace for executing command in current thread
             namespace eval $kernel {
-                # Create substitute "ns_conn", since original "ns_conn" in kernel will return "no connection"
+                # Santiphap: Create substitute "ns_conn", since original "ns_conn" in kernel will return "no connection"
                 proc ns_conn {args} {
                     set kernel [lindex [split [namespace current] ::] 6]
                     if {[nsv_exists shell_conn "$kernel,$args"]} {
@@ -274,37 +273,37 @@ namespace eval ws::shell {
                         return -code error "bad option \"$args\": must be acceptedcompression, auth, authpassword, authuser, contentfile, contentlength, contentsentlength, driver, files, flags, form, headers, host, id, isconnected, location, method, outputheaders, peeraddr, peerport, pool, port, protocol, query, partialtimes, request, server, sock, start, timeout, url, urlc, urlv, version, or zipaccepted"
                     }
                 }
-                # Create substitute "puts", since original "puts" doesn't return anything
+                # Santiphap: Create substitute "puts", since original "puts" doesn't return anything
                 proc puts {text} {
                     return $text
                 }
-                # Create snapshot
+                # Santiphap: Create snapshot object, see shell.tcl
                 ::ws::snapshot::Snapshot create snapshot -namespace [namespace current]
             }
 
-            # Restore snapshot
+            # Santiphap: Restore snapshot from thread
             set snapshots [lindex [threadHandler eval "puts \$snapshot" $kernel $channel] 3]
             namespace eval $kernel [join $snapshots "\n"]
 
-            # Execute command in ws::shell::$kernel
+            # Santiphap: Execute command in temporary unique namespace based on kernelId (ws::shell::kernelId)
             ns_log notice "ws::shell::$kernel evals <$arg>"
             if {[catch {set result [namespace eval $kernel $arg]} errorMsg]} {
-                # Delete temporary namespace
+                # Santiphap: If error, delete temporary namespace
                 namespace delete $kernel
-                # Return result
+                # Santiphap: Return result
                 return [list status error result $errorMsg]
             } else {
-                # Dump a snapshot and save a dump text to thread
+                # Santiphap: If no error, dump a snapshot and save a dump text to thread
                 set t_arg "set snapshot \[list [split [namespace eval $kernel snapshot dump] "\n"]\]"
                 threadHandler eval $t_arg $kernel $channel
-                # Delete temporary namespace
+                # Santiphap: Also delete temporary namespace
                 namespace delete $kernel
-                # Return result
+                # Santiphap: Return result
                 return [list status ok result $result]
             }
         }
 
-        # Internal eval
+        # Santiphap: Internal eval, used for autocomplete
         #  - same as eval
         #  - return the result directly if status is ok
         :method internal_eval {arg kernel channel} {
@@ -318,24 +317,24 @@ namespace eval ws::shell {
             return ""
         }
 
-        # Autocomplete
+        # Santiphap: Autocomplete
         #  - return the possible options
         :public method autocomplete {arg kernel channel} {
             set result {}
             set type ""
-            # Variable autocomplete
+            # Santiphap: Variable autocomplete if last word start with $
             if { [string match "$*" [lindex [split $arg " "] end]] } {
                 ns_log notice "Autocomplete variable: $arg"
                 set type variables
-                # Get var prefix without $
+                # Santiphap: Get var prefix without $
                 set var_prefix [string range [lindex [split $arg " "] end] 1 end]
-                # Get matched variable
+                # Santiphap: Get matched variable
                 set var_result [:internal_eval "info vars $var_prefix*" $kernel $channel]
-                # Get matched namepace
+                # Santiphap: Get matched namepace
                 set namespace_parent [join [lreplace [split $var_prefix :] end-1 end] ::]
                 set namespace_pattern [lindex [split $var_prefix :] end]
                 set namespace_result [:internal_eval "namespace children ${namespace_parent}:: $namespace_pattern*" $kernel $channel]
-                # Add prefix $ and save to result
+                # Santiphap: Add prefix $ and save to result
                 foreach r $var_result {
                     set result [concat $result "\$$r"]
                 }
@@ -344,45 +343,49 @@ namespace eval ws::shell {
                 }
                 lsort -unique $result
             } else {
-                # General command autocomplete
+                # Santiphap: Get last word
                 set sub_arg [string trimleft [lindex [split $arg "\["] end]]
+                # Santiphap: Command autocomplete
                 if { [llength [split $sub_arg " "]] eq 1} {
                     ns_log notice "Autocomplete command: $sub_arg"
                     set type commands
-                    # Get matched commands list
+                    # Santiphap: Get matched commands list
                     set commands [:internal_eval "info commands $sub_arg*" $kernel $channel]
-                    # Get matched class list, since some might not appear on info commands 
+                    # Santiphap: Get matched class list, since some might not appear on info commands 
                     set classes [:internal_eval "nx::Class info instances $sub_arg*" $kernel $channel]
-                    # Get matched object list, since some might not appear on info commands 
+                    # Santiphap: Get matched object list, since some might not appear on info commands 
                     set objects [:internal_eval "nx::Object info instances $sub_arg*" $kernel $channel]
-                    # Sort & unique
+                    # Santiphap: Sort & unique
                     set result [lsort -unique [concat $commands $classes $objects]]
                 }
-                # Class/Object method autocomplete
+                # Santiphap: Class/Object method autocomplete
                 if { [llength [split $sub_arg " "]] eq 2} {
                     set result subcommands
                     ns_log notice "Autocomplete subcommand: $sub_arg"
                     set type subcommands
-                    # Get class/object name
+                    # Santiphap: Get class/object name
                     set obj [lindex [split $sub_arg " "] 0]
-                    # Get method prefix
+                    # Santiphap: Get method prefix
                     set m_arg [lindex [split $sub_arg " "] 1]
-                    # Get matched class/object methods
+                    # Santiphap: Get matched class/object methods
                     set methods [:internal_eval "$obj info lookup methods $m_arg*" $kernel $channel]
                     # Sort & unique
                     set result [lsort -unique [concat $methods]]
                 }
             }
+            # Santiphap: Return autocomplete option type and list
             return [list status autocomplete result [concat $type $result]]
         }
 
-        # Update kernel heartbeat
+        # Santiphap: Receiving heartbeat from client
         :public method heartbeat {kernel channel} {
+            # Santiphap: Update kernel timestamp
             ns_log notice "Shell heartbeat: $kernel"
             nsv_set shell_kernels $kernel [ns_time]
             return [list status noreply result ""]
         }
     }
+    # Santiphap: CurrentThreadHandler will be the main handler
     CurrentThreadHandler create handler
 
     #
@@ -421,9 +424,11 @@ namespace eval ws::shell {
                 # autoload nx, should be generalized
                 kernels do [list interp eval $name {
                     package require nx
+                    # Santiphap: Substitute puts command
                     proc puts {text} {
                         return $text
                     }
+                    # Santiphap: initialize snapshot variable
                     set snapshot ""
                 }]
                 lappend :kernels $name
@@ -466,17 +471,18 @@ namespace eval ws::shell {
 
         }
     }
+    # Santiphap: KernelThreadHandler only uses for store snapshot for each kernel
     KernelThreadHandler create threadHandler
 
-    # Set shell heartbeat
-    set shell_heartbeat 3000
-    # Clear dead kernels every 10 second
-    ns_schedule_proc 10 {
+    # Santiphap: Clear dead kernels in interval
+    # - based param "kernel_timeout" in module
+    # - default 10s
+    ns_schedule_proc [ns_config ns/server/[ns_info server]/module/websocket/shell kernel_timeout 10] {
         array set kernels [nsv_array get shell_kernels]
         foreach name [array names kernels] {
-            # Delete kernel if no heartbeat more than 10s
-            if { [expr {[ns_time] - $kernels($name)}] > 10} {
-                ::ws::shell::kernels do [list interp delete $name]
+            # Santiphap: Delete kernel if no heartbeat more than 10s
+            if { [expr {[ns_time] - $kernels($name)}] > [ns_config ns/server/[ns_info server]/module/websocket/shell kernel_timeout 10]} {
+                catch {::ws::shell::kernels do [list interp delete $name]}
                 nsv_unset shell_kernels $name
                 foreach key [nsv_array names shell_conn] {
                     if {$name eq [lindex [split $key ,] 0]} {
