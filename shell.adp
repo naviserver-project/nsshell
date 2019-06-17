@@ -1,14 +1,22 @@
 <!DOCTYPE html>
 <%
+   # Get hostname without protocol (ie. "localhost")
    set host [lindex [split [ns_conn location] "/"] 2]
+   # Get WebSocket Protocol (ie. "ws")
    set wsProtocol [expr {[ns_conn protocol] eq "http" ? "ws" : "wss"}]
+   # Get Shell url from module (ie. "shell")
    set shellUrl [string map {"/" ""} [ns_config ns/server/[ns_info server]/module/websocket/shell urls]]
+
+   # Generate Base url (ie. "localhost/shell")
    set baseUrl [string trimright $host/$shellUrl]
+   # Generate WebSocket url (ie. ws://localhost/shell/connect)
    set wsUri $wsProtocol://$baseUrl/connect
 
-   # Generate kernelID
-   set kernelID [ns_uuid]
-   # If kernel is specified
+   # Generate kernelId
+   # Combine uuid with connection id and encrpyt with sha-1
+   set kernelID [ns_sha1 "[ns_uuid] [ns_conn id]"]
+
+   # If kernel is specified on url, change kernelId to the url one 
    if {[lindex [split [string map [list /$shellUrl ""] [ns_conn url]] /] 1] eq "kernel"} {
     set kernelID [string trim [string map [list /$shellUrl/kernel ""] [ns_conn url]] "/"]
     # KernelID cannot empty
@@ -16,6 +24,7 @@
       ns_returnredirect [ns_conn location]/$shellUrl
     }
    } else {
+    # If kernel isn't specified on url, redirect with the generated kernelId
     ns_returnredirect [ns_conn location]/$shellUrl/kernel/$kernelID 
    }
 
@@ -60,40 +69,45 @@
 
 <body role="document" class="bg-black h-100 w-100">
 
-  <div id="term_demo" class="w-100 h-100"></div>
+  <div id="ns_term" class="w-100 h-100"></div>
   <script language="javascript" type="text/javascript">
-    var wsUri = '<%= $wsUri %>';
-    var kernelID = '<%= $kernelID %>';
-    var kernelName = "user-" + kernelID.substring(0, 5).toLowerCase();
-    var output;
-    var state;
-    var websocket = 0;
-    var myterm = null;
-    var autocomplete_options = null;
-    var wrapper = null;
-    var keywords = [];
-    var original_keywords = Prism.languages.tcl.keyword;
+    var wsUri = '<%= $wsUri %>'; // Websocket Url
+    var kernelID = '<%= $kernelID %>'; // Kernel Id
+    var kernelName = "user-" + kernelID.substring(0, 5).toLowerCase(); // Username based on KernelId
+    var websocket = 0; // Websocket object
+    var myterm = null; // Shell object
+    var autocomplete_options = null; // Current autocomplete options
+    var wrapper = null; // Wrapper part of the terminal, used for showing autocomplete options
+    var keywords = []; // Command keywords
+    var original_keywords = Prism.languages.tcl.keyword; // TCL keywords
 
+    // Function: init()
+    // Description: initilize when document ready
     function init() {
-      initializeTerminal();
-      testWebSocket();
+      initializeTerminal(); // Initialize terminal
+      startWebSocket(); // Initialize Websocket
     }
 
+    // Initilize terminal
     function initializeTerminal() {
+      // Initialize terminal div
       jQuery(function ($, undefined) {
-        $('#term_demo').terminal(function (command, term) {
+        // Handle when command sent
+        $('#ns_term').terminal(function (command, term) {
+          // Update terminal object
           myterm = term;
+          // Get kernel ID
           var kernel = kernelID;
           if (kernel === undefined) {
             kernel = '';
           }
+          // Set command via websocket
           command = command.trimLeft();
           if (command !== '') {
             websocket.send(JSON.stringify(['eval', command, kernel]));
-          } else {
-            term.echo('');
           }
         }, {
+          // Greeting message
           greetings: function () {
             this.echo('[[;white;]##################################]');
             this.echo('[[;white;]#  Welcome to naviserver shell.  #]');
@@ -111,17 +125,6 @@
           keydown: function (e) {
             // If Tab, autocomplete
             if (e.key == "Tab") {
-              // Auto add ::
-              /*
-              var is_namespace = true;
-              autocomplete_options.forEach(function (item) {
-                if (item.charAt(0) != ":") {
-                  is_namespace = false;
-                }
-              });
-              if (is_namespace && myterm.get_command().trimLeft().charAt(0) != ":")
-                myterm.set_command("::" + myterm.get_command().trimLeft());
-              */
               // Auto complete
               myterm.complete(autocomplete_options);
               return false;
@@ -129,8 +132,6 @@
           },
           onCommandChange: function (command, term) {
             // Show autocomplete options when command change
-            //subcommand = command.split("[");
-            //command = subcommand[subcommand.length-1];
             // Trim whitespace
             command = command.trimLeft();
             // If command is blank, not run autocomplete & hide current option
@@ -146,20 +147,19 @@
           // After execute, command will start with "$ "
           // Therefore, extract the prefix
           var prefix = "";
-          if(string.split(" ")[0] == "$"){
+          if (string.split(" ")[0] == "$") {
             prefix = "$ ";
             var s = string.split(" ");
             s.shift();
             string = s.join(" ");
           }
           // Highlight command
-          console.log($.terminal.prism("tcl",$.terminal.escape_brackets(string)));
-          return prefix+$.terminal.prism("tcl",$.terminal.escape_brackets(string));
+          return prefix + $.terminal.prism("tcl", $.terminal.escape_brackets(string));
         });
       });
     }
 
-    function testWebSocket() {
+    function startWebSocket() {
       if ("WebSocket" in window) {
         websocket = new WebSocket(wsUri);
       } else {
@@ -179,49 +179,58 @@
       };
     }
 
+    // Show message when websocket is connected and also start sending heartbeat
     function onOpen(evt) {
       myterm.echo('[[;lightgreen;]Kernel "' + kernelName + '" is connected.]');
       heartbeat();
     }
 
+    // Show message when websocket is disconnected and also restart websocket again
     function onClose(evt) {
       myterm.echo('[[;red;]Kernel "' + kernelName + '" is disconnected.]');
-      testWebSocket();
+      startWebSocket();
     }
 
+    // Eval received message and scroll to bottom
     function onMessage(evt) {
       if (evt.data == "") return;
       var result = window.eval(evt.data.split("\n").join("\\n"));
       $('html, body').scrollTop($(document).height());
     }
 
+    // Unused
     function onError(evt) {}
 
+    // Unused
     function doSend(message) {
       websocket.send(message);
     }
 
+    // Unused
     function checkSubmit(e) {
       if (e && e.keyCode == 13) {
         doSend($('#msg').val());
       }
     }
 
+    // Unused
     function clearOutput() {
       myterm.clear();
     }
 
+    // Update autocomplete options
     function update_autocomplete(text) {
       if (myterm == null) return;
       // Update options array
       autocomplete_options = text.split(" ");
+      // First element is type of options. So, extract it
       var type = autocomplete_options.shift();
-      // Add commands to keywords for highlighting
-      if(type == "commands"){
+      // Add commands to keywords for syntax highlighting
+      if (type == "commands") {
         keywords = keywords.concat(autocomplete_options).filter(unique);
         updateKeywords();
       }
-      // Add '[' if nessessary
+      // Add '[' if nessessary, for autocomplete
       if (myterm.get_command().trim().split(" ").pop().charAt(0) == '[') {
         for (var i = 0; i < autocomplete_options.length; i++)
           autocomplete_options[i] = "[" + autocomplete_options[i];
@@ -236,26 +245,34 @@
       }
     }
 
-    function updateKeywords(){
+    // Update keywords, for syntax highlighting
+    function updateKeywords() {
+      // Get source from origin Tcl keywords
       var new_source = original_keywords.pattern.source;
+      // Append new keywords
       var index = new_source.indexOf("vwait");
-      new_source = new_source.substring(0,index) + keywords.join("|") + "|" + new_source.substring(index);
-      Prism.languages.tcl = Prism.languages.extend('tcl', { 'keyword': {
-        lookbehind: true,
-        pattern: new RegExp(new_source, "m")
-      }});
+      new_source = new_source.substring(0, index) + keywords.join("|") + "|" + new_source.substring(index);
+      // Extend PrismJS for syntax highlighting
+      Prism.languages.tcl = Prism.languages.extend('tcl', {
+        'keyword': {
+          lookbehind: true,
+          pattern: new RegExp(new_source, "m")
+        }
+      });
     }
 
+    // For making keywords array becomes unique
     function unique(value, index, self) {
       return self.indexOf(value) === index;
     }
 
+    // Sending heartbeat to server
     function heartbeat() {
       websocket.send(JSON.stringify(['heartbeat', kernelID]));
       // Send heartbeat every 3s
       setTimeout(function () {
         heartbeat();
-      }, "<%= $::ws::shell::shell_heartbeat %>" );
+      }, "<%= $::ws::shell::shell_heartbeat %>");
     }
 
     $(document).ready(function () {
