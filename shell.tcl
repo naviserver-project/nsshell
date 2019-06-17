@@ -322,9 +322,11 @@ namespace eval ws::shell {
         #  - return the possible options
         :public method autocomplete {arg kernel channel} {
             set result {}
+            set type ""
             # Variable autocomplete
             if { [string match "$*" [lindex [split $arg " "] end]] } {
                 ns_log notice "Autocomplete variable: $arg"
+                set type variables
                 # Get var prefix without $
                 set var_prefix [string range [lindex [split $arg " "] end] 1 end]
                 # Get matched variable
@@ -346,6 +348,7 @@ namespace eval ws::shell {
                 set sub_arg [string trimleft [lindex [split $arg "\["] end]]
                 if { [llength [split $sub_arg " "]] eq 1} {
                     ns_log notice "Autocomplete command: $sub_arg"
+                    set type commands
                     # Get matched commands list
                     set commands [:internal_eval "info commands $sub_arg*" $kernel $channel]
                     # Get matched class list, since some might not appear on info commands 
@@ -357,7 +360,9 @@ namespace eval ws::shell {
                 }
                 # Class/Object method autocomplete
                 if { [llength [split $sub_arg " "]] eq 2} {
+                    set result subcommands
                     ns_log notice "Autocomplete subcommand: $sub_arg"
+                    set type subcommands
                     # Get class/object name
                     set obj [lindex [split $sub_arg " "] 0]
                     # Get method prefix
@@ -368,7 +373,7 @@ namespace eval ws::shell {
                     set result [lsort -unique [concat $methods]]
                 }
             }
-            return [list status autocomplete result $result]
+            return [list status autocomplete result [concat $type $result]]
         }
 
         # Update kernel heartbeat

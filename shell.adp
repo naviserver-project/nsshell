@@ -71,6 +71,7 @@
     var autocomplete_options = null;
     var wrapper = null;
     var keywords = [];
+    var original_keywords = Prism.languages.tcl.keyword;
 
     function init() {
       initializeTerminal();
@@ -212,8 +213,12 @@
       if (myterm == null) return;
       // Update options array
       autocomplete_options = text.split(" ");
+      var type = autocomplete_options.shift();
       // Add commands to keywords for highlighting
-      keywords = keywords.concat(autocomplete_options).filter(unique);
+      if(type == "commands"){
+        keywords = keywords.concat(autocomplete_options).filter(unique);
+        updateKeywords();
+      }
       // Add '[' if nessessary
       if (myterm.get_command().trim().split(" ").pop().charAt(0) == '[') {
         for (var i = 0; i < autocomplete_options.length; i++)
@@ -221,12 +226,22 @@
       }
       // If there is any option, show options
       if (autocomplete_options.length > 0 &&
-        myterm.get_command().trim().split(" ").pop() != text &&
+        myterm.get_command().trim().split(" ").pop() != autocomplete_options.join(" ") &&
         myterm.get_command().trim() != "") {
-        $("#autocomplete").html(text);
+        $("#autocomplete").html(autocomplete_options.join(" "));
       } else {
         $("#autocomplete").html("");
       }
+    }
+
+    function updateKeywords(){
+      var new_source = original_keywords.pattern.source;
+      var index = new_source.indexOf("vwait");
+      new_source = new_source.substring(0,index) + keywords.join("|") + "|" + new_source.substring(index);
+      Prism.languages.tcl = Prism.languages.extend('tcl', { 'keyword': {
+        lookbehind: true,
+        pattern: new RegExp(new_source, "m")
+      }});
     }
 
     function unique(value, index, self) {
