@@ -35,11 +35,15 @@
     crossorigin="anonymous">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.4.1/css/jquery.terminal.min.css"
     rel="stylesheet" />
+  <link href="https://unpkg.com/prismjs@1.16.0/themes/prism-tomorrow.css" rel="stylesheet" />
   <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" crossorigin="anonymous">
   </script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.4.1/js/jquery.terminal.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.6.3/js/jquery.terminal.min.js"></script>
+  <script src="https://unpkg.com/prismjs@1.16.0/prism.js"></script>
+  <script src="https://unpkg.com/prismjs@1.16.0/components/prism-tcl.js"></script>
+  <script src="https://unpkg.com/jquery.terminal@2.6.3/js/prism.js"></script>
   <style>
     #autocomplete {
       list-style: none;
@@ -68,6 +72,7 @@
     var autocomplete_options = null;
     var wrapper = null;
     var keywords = [];
+    var original_keywords = Prism.languages.tcl.keyword;
 
     function init() {
       initializeTerminal();
@@ -107,6 +112,7 @@
             // If Tab, autocomplete
             if (e.key == "Tab") {
               // Auto add ::
+              /*
               var is_namespace = true;
               autocomplete_options.forEach(function (item) {
                 if (item.charAt(0) != ":") {
@@ -115,6 +121,7 @@
               });
               if (is_namespace && myterm.get_command().trimLeft().charAt(0) != ":")
                 myterm.set_command("::" + myterm.get_command().trimLeft());
+              */
               // Auto complete
               myterm.complete(autocomplete_options);
               return false;
@@ -134,28 +141,20 @@
               update_autocomplete("");
           }
         });
-
         // Syntax Highlight
         $.terminal.defaults.formatters.push(function (string) {
-          var quote = "";
-          return string.split(/((?:\s|&nbsp;)+)/).map(function (string) {
-            // Highlight quotes
-            if (quote != "") {
-              if (string.charAt(string.length - 1) == quote) quote = "";
-              return '[[;#cd9078;]' + string + ']';
-            } else if (string.charAt(0) == "\"" || string.charAt(0) == "'") {
-              quote = string.charAt(0);
-              return '[[;#cd9078;]' + string + ']';
-            }
-            // Highlight variable
-            if (string.charAt(0) == "$")
-              return '[[;#85dcf2;]' + string + ']';
-            // Highlight command
-            if (keywords.indexOf(string) != -1)
-              return '[[;#569cd5;]' + string + ']';
-            // No highlight
-            return string;
-          }).join('');
+          // After execute, command will start with "$ "
+          // Therefore, extract the prefix
+          var prefix = "";
+          if(string.split(" ")[0] == "$"){
+            prefix = "$ ";
+            var s = string.split(" ");
+            s.shift();
+            string = s.join(" ");
+          }
+          // Highlight command
+          console.log($.terminal.prism("tcl",$.terminal.escape_brackets(string)));
+          return prefix+$.terminal.prism("tcl",$.terminal.escape_brackets(string));
         });
       });
     }
@@ -216,16 +215,35 @@
       if (myterm == null) return;
       // Update options array
       autocomplete_options = text.split(" ");
+      var type = autocomplete_options.shift();
       // Add commands to keywords for highlighting
-      keywords = keywords.concat(autocomplete_options).filter(unique);
+      if(type == "commands"){
+        keywords = keywords.concat(autocomplete_options).filter(unique);
+        updateKeywords();
+      }
+      // Add '[' if nessessary
+      if (myterm.get_command().trim().split(" ").pop().charAt(0) == '[') {
+        for (var i = 0; i < autocomplete_options.length; i++)
+          autocomplete_options[i] = "[" + autocomplete_options[i];
+      }
       // If there is any option, show options
       if (autocomplete_options.length > 0 &&
-        myterm.get_command().trim().split(" ").pop() != text &&
+        myterm.get_command().trim().split(" ").pop() != autocomplete_options.join(" ") &&
         myterm.get_command().trim() != "") {
-        $("#autocomplete").html(text);
+        $("#autocomplete").html(autocomplete_options.join(" "));
       } else {
         $("#autocomplete").html("");
       }
+    }
+
+    function updateKeywords(){
+      var new_source = original_keywords.pattern.source;
+      var index = new_source.indexOf("vwait");
+      new_source = new_source.substring(0,index) + keywords.join("|") + "|" + new_source.substring(index);
+      Prism.languages.tcl = Prism.languages.extend('tcl', { 'keyword': {
+        lookbehind: true,
+        pattern: new RegExp(new_source, "m")
+      }});
     }
 
     function unique(value, index, self) {
@@ -235,9 +253,9 @@
     function heartbeat() {
       websocket.send(JSON.stringify(['heartbeat', kernelID]));
       // Send heartbeat every 3s
-      setTimeout(function(){ 
+      setTimeout(function () {
         heartbeat();
-      }, <%= $::ws::shell::shell_heartbeat %>);
+      }, "<%= $::ws::shell::shell_heartbeat %>" );
     }
 
     $(document).ready(function () {

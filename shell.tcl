@@ -23,10 +23,7 @@ if {$urls eq ""} {
 foreach url $urls {
     ns_log notice "websocket: shell available under $url"
     ns_register_adp -noinherit GET $url [file dirname [info script]]/shell.adp
-    # For shell with specific kernel
     ns_register_adp GET $url/kernel/ [file dirname [info script]]/shell.adp
-    # For ns_conn
-    # ns_register_tcl  GET $url/conn [file dirname [info script]]/shell-conn.tcl
     ns_register_proc -noinherit GET $url/connect ::ws::shell::connect
 }
 
@@ -325,9 +322,11 @@ namespace eval ws::shell {
         #  - return the possible options
         :public method autocomplete {arg kernel channel} {
             set result {}
+            set type ""
             # Variable autocomplete
             if { [string match "$*" [lindex [split $arg " "] end]] } {
                 ns_log notice "Autocomplete variable: $arg"
+                set type variables
                 # Get var prefix without $
                 set var_prefix [string range [lindex [split $arg " "] end] 1 end]
                 # Get matched variable
@@ -346,31 +345,35 @@ namespace eval ws::shell {
                 lsort -unique $result
             } else {
                 # General command autocomplete
-                if { [llength [split $arg " "]] eq 1} {
-                    ns_log notice "Autocomplete command: $arg"
+                set sub_arg [string trimleft [lindex [split $arg "\["] end]]
+                if { [llength [split $sub_arg " "]] eq 1} {
+                    ns_log notice "Autocomplete command: $sub_arg"
+                    set type commands
                     # Get matched commands list
-                    set commands [:internal_eval "info commands $arg*" $kernel $channel]
+                    set commands [:internal_eval "info commands $sub_arg*" $kernel $channel]
                     # Get matched class list, since some might not appear on info commands 
-                    set classes [:internal_eval "nx::Class info instances $arg*" $kernel $channel]
+                    set classes [:internal_eval "nx::Class info instances $sub_arg*" $kernel $channel]
                     # Get matched object list, since some might not appear on info commands 
-                    set objects [:internal_eval "nx::Object info instances $arg*" $kernel $channel]
+                    set objects [:internal_eval "nx::Object info instances $sub_arg*" $kernel $channel]
                     # Sort & unique
                     set result [lsort -unique [concat $commands $classes $objects]]
                 }
                 # Class/Object method autocomplete
-                if { [llength [split $arg " "]] eq 2} {
-                    ns_log notice "Autocomplete subcommand: $arg"
+                if { [llength [split $sub_arg " "]] eq 2} {
+                    set result subcommands
+                    ns_log notice "Autocomplete subcommand: $sub_arg"
+                    set type subcommands
                     # Get class/object name
-                    set obj [lindex [split $arg " "] 0]
+                    set obj [lindex [split $sub_arg " "] 0]
                     # Get method prefix
-                    set m_arg [lindex [split $arg " "] 1]
+                    set m_arg [lindex [split $sub_arg " "] 1]
                     # Get matched class/object methods
                     set methods [:internal_eval "$obj info lookup methods $m_arg*" $kernel $channel]
                     # Sort & unique
                     set result [lsort -unique [concat $methods]]
                 }
             }
-            return [list status autocomplete result $result]
+            return [list status autocomplete result [concat $type $result]]
         }
 
         # Update kernel heartbeat
