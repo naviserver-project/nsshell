@@ -21,7 +21,7 @@ The interactive shell consists of these features:
 Configuration:
 --------------
 
-In order to configure WebSockets, add the following lines to the config file of NaviServer.
+In order to configure an interactive shell module, add the following lines to the config file of NaviServer.
 
     ns_section "ns/server/${server}/module/websocket/shell" {
         ns_param    urls                /shell
