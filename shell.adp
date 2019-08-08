@@ -48,7 +48,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
     crossorigin="anonymous">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.4.1/css/jquery.terminal.min.css"
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.6.3/css/jquery.terminal.min.css"
     rel="stylesheet" />
   <link href="https://unpkg.com/prismjs@1.16.0/themes/prism-tomorrow.css" rel="stylesheet" />
   <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
@@ -131,6 +131,30 @@
           keydown: function (e) {
             // If Tab, autocomplete
             if (e.key == "Tab") {
+              // Check if all options are start with :: or not
+              var is_all_semicolon = autocomplete_options != null & autocomplete_options.length > 0;
+              for(var i = 0 ; i < autocomplete_options.length ; i++){
+                if(!autocomplete_options[i].startsWith("::") && !autocomplete_options[i].startsWith("[::")){
+                  is_all_semicolon = false;
+                  break;
+                }
+              }
+              // Add :: to current command if necessary
+              if(is_all_semicolon){
+                // Get last commands
+                var commands = myterm.get_command().split(" ");
+                var last_command = commands[commands.length - 1];
+                // Add :: if necessary
+                if(!last_command.startsWith("::")){
+                  if(last_command.startsWith("["))
+                    last_command = "[::" + last_command.slice(1);
+                  else
+                    last_command = "::" + last_command;
+                }
+                // Update commands
+                commands[commands.length - 1] = last_command;
+                myterm.set_command(commands.join(" "));
+              }
               // Auto complete
               myterm.complete(autocomplete_options);
               return false;
@@ -245,10 +269,19 @@
       if (autocomplete_options.length > 0 &&
         myterm.get_command().trim().split(" ").pop() != autocomplete_options.join(" ") &&
         myterm.get_command().trim() != "") {
-        $("#autocomplete").html(autocomplete_options.join(" "));
+        $("#autocomplete").html("<a ondblclick='selectCommand(this)'>" + 
+          autocomplete_options.join("</a> <a ondblclick='selectCommand(this)'>") + 
+          "</a>");
       } else {
         $("#autocomplete").html("");
       }
+    }
+
+    // Update command when user select command by double click
+    function selectCommand(cmd) {
+      var commands = myterm.get_command().split(" ");
+      commands[commands.length - 1] = cmd.innerHTML;
+      myterm.set_command(commands.join(" "));
     }
 
     // Update keywords, for syntax highlighting
