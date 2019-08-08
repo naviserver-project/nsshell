@@ -131,6 +131,30 @@
           keydown: function (e) {
             // If Tab, autocomplete
             if (e.key == "Tab") {
+              // Check if all options are start with :: or not
+              var is_all_semicolon = autocomplete_options != null & autocomplete_options.length > 0;
+              for(var i = 0 ; i < autocomplete_options.length ; i++){
+                if(!autocomplete_options[i].startsWith("::") && !autocomplete_options[i].startsWith("[::")){
+                  is_all_semicolon = false;
+                  break;
+                }
+              }
+              // Add :: to current command if necessary
+              if(is_all_semicolon){
+                // Get last commands
+                var commands = myterm.get_command().split(" ");
+                var last_command = commands[commands.length - 1];
+                // Add :: if necessary
+                if(!last_command.startsWith("::")){
+                  if(last_command.startsWith("["))
+                    last_command = "[::" + last_command.slice(1);
+                  else
+                    last_command = "::" + last_command;
+                }
+                // Update commands
+                commands[commands.length - 1] = last_command;
+                myterm.set_command(commands.join(" "));
+              }
               // Auto complete
               myterm.complete(autocomplete_options);
               return false;
