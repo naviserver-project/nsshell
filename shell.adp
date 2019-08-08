@@ -269,10 +269,19 @@
       if (autocomplete_options.length > 0 &&
         myterm.get_command().trim().split(" ").pop() != autocomplete_options.join(" ") &&
         myterm.get_command().trim() != "") {
-        $("#autocomplete").html(autocomplete_options.join(" "));
+        $("#autocomplete").html("<a ondblclick='selectCommand(this)'>" + 
+          autocomplete_options.join("</a> <a ondblclick='selectCommand(this)'>") + 
+          "</a>");
       } else {
         $("#autocomplete").html("");
       }
+    }
+
+    // Update command when user select command by double click
+    function selectCommand(cmd) {
+      var commands = myterm.get_command().split(" ");
+      commands[commands.length - 1] = cmd.innerHTML;
+      myterm.set_command(commands.join(" "));
     }
 
     // Update keywords, for syntax highlighting
