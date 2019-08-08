@@ -1,5 +1,6 @@
 package req nx
 package req nx::serializer
+package req xotcl::serializer
 
 namespace eval ws::snapshot {
     nx::Class create Snapshot {
@@ -7,7 +8,7 @@ namespace eval ws::snapshot {
         # Collect the following types of things in the workspace
         #
         :property {elements {
-            vars nx-objects
+            vars nx-objects xotcl-objects
         }}
 
         #
@@ -25,16 +26,29 @@ namespace eval ws::snapshot {
         :method "collect nx-objects" {} {
             # Get objects from specified namespace
             return [lmap o [nx::Object info instances -closure ${:namespace}::*] {
-            #
-            # Filter slot objects
-            #
-            if {[string match *::slot::* $o]
-                || [::nx::isSlotContainer $o]
-            } continue
-            set o
+		#
+		# Filter slot objects
+		#
+		if {[string match *::slot::* $o]
+		    || [::nx::isSlotContainer $o]
+		} continue
+		set o
             }]
         }
 
+        :method "collect xotcl-objects" {} {
+            # Get objects from specified namespace
+            return [lmap o [xotcl::Object info instances -closure ${:namespace}::*] {
+		#
+		# Filter slot objects
+		#
+		if {[string match *::slot::* $o]
+		    || [::nx::isSlotContainer $o]
+		} continue
+		set o
+            }]
+        }
+	
         :public method "collect all" {} {
             foreach e ${:elements} { dict set d $e [:collect $e] }
             return $d
@@ -46,20 +60,28 @@ namespace eval ws::snapshot {
         :method "save vars" {vars} {
             set result ""
             foreach e $vars {
-            append result [list set $e [set $e]] \n
+		append result [list set $e [set $e]] \n
             }
             return $result
         }
         :method "save nx-objects" {objects} {
             set s [::nx::serializer::Serializer new]
             foreach oss [::nx::serializer::ObjectSystemSerializer info instances] {
-            $oss registerSerializer $s $objects
+		$oss registerSerializer $s $objects
             }	    
             set result [$s serialize-objects $objects 0]
             $s destroy
             return $result
         }
-
+        :method "save xotcl-objects" {objects} {
+            set s [::nx::serializer::Serializer new]
+            foreach oss [::nx::serializer::ObjectSystemSerializer info instances] {
+		$oss registerSerializer $s $objects
+            }	    
+            set result [$s serialize-objects $objects 0]
+            $s destroy
+            return $result
+        }
         #
         # Compute differences between dicts
         #
@@ -69,9 +91,9 @@ namespace eval ws::snapshot {
         :public method diff {} {
             set current [:collect all]
             foreach e ${:elements} {
-            #puts "START $e: [llength [dict get ${:start} $e]]"
-            #puts "NOW   $e: [llength [dict get $current $e]]"
-            dict set diff $e [:listDiff [dict get $current $e] [dict get ${:start} $e]]
+		#puts "START $e: [llength [dict get ${:start} $e]]"
+		#puts "NOW   $e: [llength [dict get $current $e]]"
+		dict set diff $e [:listDiff [dict get $current $e] [dict get ${:start} $e]]
             }
             return $diff
         }
@@ -84,7 +106,7 @@ namespace eval ws::snapshot {
             set diff [:diff]
             set result ""
             foreach e ${:elements} {
-            append result [:save $e [dict get $diff $e]]
+		append result [:save $e [dict get $diff $e]]
             }
             return $result
 

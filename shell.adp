@@ -1,20 +1,32 @@
 <!DOCTYPE html>
 <%
-   # Get hostname without protocol (ie. "localhost")
+   # Get hostname without protocol (i.e. "localhost")
    set host [lindex [split [ns_conn location] "/"] 2]
-   # Get WebSocket Protocol (ie. "ws")
+   # Get WebSocket Protocol (i.e. "ws")
    set wsProtocol [expr {[ns_conn protocol] eq "http" ? "ws" : "wss"}]
-   # Get Shell url from module (ie. "shell")
+   # Get Shell url from module (i.e. "shell")
    set shellUrl [string map {"/" ""} [ns_config ns/server/[ns_info server]/module/websocket/shell urls]]
 
-   # Generate Base url (ie. "localhost/shell")
+   # Generate Base url (i.e. "localhost/shell")
    set baseUrl [string trimright $host/$shellUrl]
-   # Generate WebSocket url (ie. ws://localhost/shell/connect)
+   # Generate WebSocket url (i.e. ws://localhost/shell/connect)
    set wsUri $wsProtocol://$baseUrl/connect
 
    # Generate kernelId
    # Combine uuid with connection id and encrpyt with sha-1
    set kernelID [ns_sha1 "[ns_uuid] [ns_conn id]"]
+
+   # Remember ns_conn settings from the start of this shell
+   # in a nsv variable for this kernel.
+   foreach subcommand {
+      acceptedcompression auth authpassword authuser
+      contentfile contentlength contentsentlength driver files flags form
+      headers host id isconnected location method outputheaders peeraddr
+      peerport pool port protocol query partialtimes request server sock
+      start timeout url urlc urlv version zipaccepted
+   } {
+       nsv_set shell_conn $kernelID,$subcommand [ns_conn $subcommand]
+   }
 
    # If kernel is specified on url, change kernelId to the url one 
    if {[lindex [split [string map [list /$shellUrl ""] [ns_conn url]] /] 1] eq "kernel"} {
@@ -26,12 +38,6 @@
    } else {
     # If kernel isn't specified on url, redirect with the generated kernelId
     ns_returnredirect [ns_conn location]/$shellUrl/kernel/$kernelID 
-   }
-
-   # Set ns_conn global variable for this kernel
-   set conn_commands [list acceptedcompression auth authpassword authuser contentfile contentlength contentsentlength driver files flags form headers host id isconnected location method outputheaders peeraddr peerport pool port protocol query partialtimes request server sock start timeout url urlc urlv version zipaccepted]
-   foreach command $conn_commands {
-      nsv_set shell_conn $kernelID,$command [ns_conn $command]
    }
  %>
 <html>
@@ -82,13 +88,13 @@
     var original_keywords = Prism.languages.tcl.keyword; // TCL keywords
 
     // Function: init()
-    // Description: initilize when document ready
+    // Description: initialize when document ready
     function init() {
       initializeTerminal(); // Initialize terminal
       startWebSocket(); // Initialize Websocket
     }
 
-    // Initilize terminal
+    // Initialize terminal
     function initializeTerminal() {
       // Initialize terminal div
       jQuery(function ($, undefined) {
@@ -230,7 +236,7 @@
         keywords = keywords.concat(autocomplete_options).filter(unique);
         updateKeywords();
       }
-      // Add '[' if nessessary, for autocomplete
+      // Add '[' if necessary, for autocomplete
       if (myterm.get_command().trim().split(" ").pop().charAt(0) == '[') {
         for (var i = 0; i < autocomplete_options.length; i++)
           autocomplete_options[i] = "[" + autocomplete_options[i];

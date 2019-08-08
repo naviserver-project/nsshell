@@ -6,13 +6,18 @@ Release 0.1a
     h11728213@s.wu.ac.at
     neumann@wu-wien.ac.at
 
-This is a NaviServer module that implements an interactive shell for NaviServer. The websocket module (https://bitbucket.org/naviserver/websocket) is required for using this module. The implementation is based on miniterm, which provided by Gustaf Neumann.
+This is a NaviServer module that implements an interactive shell for
+NaviServer. The websocket module
+(https://bitbucket.org/naviserver/websocket) is required for using
+this module. The implementation is based on miniterm developed by Gustaf Neumann.
 
-The interactive shell consists of these features:
+The interactive shell supports the following features:
 
 * Web-based interactive shell
-* Supports TCL, NX (http://next-scripting.org/), and Naviserver (https://wiki.tcl-lang.org/page/NaviServer) commands
-* Command completion and syntax highlighting
+* Supports TCL, NX (http://next-scripting.org/),
+  and NaviServer (https://wiki.tcl-lang.org/page/NaviServer) commands
+* Command completion
+* Syntax highlighting
 * Supports snapshot (provided by Gustaf Neumann)
 * Supports multi-users
 
@@ -21,29 +26,43 @@ The interactive shell consists of these features:
 Configuration:
 --------------
 
-In order to configure an interactive shell module, add the following lines to the config file of NaviServer.
+In order to configure an interactive shell module, add the following
+lines to the config file of NaviServer (assuming the variable $server
+is properly set to the server to be configured.
 
+    #
+    # nsshell configuration (per-server module)
+    #
+    ns_section "ns/server/${server}/modules" {
+        ns_param    websocket tcl
+        ns_param    nsshell   tcl
+    }
+    
     ns_section "ns/server/${server}/module/websocket/shell" {
-        ns_param    urls                /shell
+        ns_param    urls                /nsshell
         ns_param    kernel_heartbeat    3
         ns_param    kernel_timeout      10
     }
 
-The configuration consists of these parameters:
+The first block makes sure that the modules "websocket" and "nsshell"
+are loaded. The second block defines the following parameters:
 
 * urls: url of shell's application
 * shell_heartbeat: kernel heartbeat interval (in seconds)
 * shell_timeout: kernel timeout interval (in seconds)
 
+
+
 Installation:
 -------------
 
-Copy all tcl/adp files to "/tcl/websocket" folder
+    cd SOMEPATH/nsshell
+    sudo make install
 
 Usage:
 ------
 
-Go to shell's url ("/shell" by default).
+Navigate to the configured browser URL ("/nsshell" by default).
 
 Authors:
 --------
