@@ -22,6 +22,7 @@ The interactive shell supports the following features:
 * Supports multi-users
 
 Current shortcomings:
+
 * no procs can be defined (required in snapshots)
 * limited connection relevant information
 * single line commands (no handling of multi-line commands, unbalanced
