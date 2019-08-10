@@ -68,7 +68,7 @@
       position: absolute;
       top: 14px;
       left: 0;
-      color: #555555;
+      color: #888888;
     }
   </style>
 </head>
@@ -107,7 +107,7 @@
           if (kernel === undefined) {
             kernel = '';
           }
-          // Set command via websocket
+          // Set command via WebSocket
           command = command.trimLeft();
           if (command !== '') {
             websocket.send(JSON.stringify(['eval', command, kernel]));
@@ -115,9 +115,9 @@
         }, {
           // Greeting message
           greetings: function () {
-            this.echo('[[;white;]##################################]');
-            this.echo('[[;white;]#  Welcome to naviserver shell.  #]');
-            this.echo('[[;white;]##################################]');
+            this.echo('[[;white;]######################################]');
+            this.echo('[[;white;]#  Welcome to the NaviServer shell.  #]');
+            this.echo('[[;white;]######################################]');
             myterm = this;
           },
           onInit: function (term) {
