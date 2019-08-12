@@ -181,21 +181,25 @@ function command_complete(code) {
     var count = 0;
     var token;
     var i = tokens.length;
-    while ((token = tokens[--i])) {
-        if (token.token === '{') {
-            count++
-        } else if (token.token == '}') {
-            count--;
+    if (i > 0) {
+        while ((token = tokens[--i])) {
+            if (token.token === '{') {
+                count++
+            } else if (token.token == '}') {
+                count--;
+            }
         }
-    }
-    var hasContinuation = (tokens[tokens.length -1].token === "\\");
-    //
-    // save "complete_command" in a global variable to avoid
-    // potentially other commands in "incomplete" state.
-    //
-    complete_command = (count == 0) && ! hasContinuation;
+        var hasContinuation = (tokens[tokens.length -1].token === "\\");
+        //
+        // save "complete_command" in a global variable to avoid
+        // potentially other commands in "incomplete" state.
+        //
+        complete_command = (count == 0) && ! hasContinuation;
 
-    //console.log('complete_command => ' + complete_command);
+        //console.log('complete_command => ' + complete_command);
+    } else {
+        complete_command = 1; // allow empty command to be sent
+    }
     return complete_command;
 }
 

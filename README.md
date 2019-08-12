@@ -1,6 +1,6 @@
 Interactive Shell for NaviServer
 =========================
-Release 0.1a
+Release 0.1b
 ------------
 
     h11728213@s.wu.ac.at
@@ -14,16 +14,18 @@ this module. The implementation is based on miniterm developed by Gustaf Neumann
 The interactive shell supports the following features:
 
 * Web-based interactive shell
-* Supports Tcl, NX (http://next-scripting.org/),
+* Support for Tcl, NX (http://next-scripting.org/),
   and NaviServer (https://wiki.tcl-lang.org/page/NaviServer) commands
 * Command completion
 * Syntax highlighting
-* Supports snapshot (provided by Gustaf Neumann)
-* Supports multi-users
+* Support for snapshots of content of current interpreter (provided by Gustaf Neumann)
+* Support for multi-users
+* Support for "proc" and "nsf::proc"
+* Support for multiline commands
+
 
 Current shortcomings:
 
-* no procs can be defined (required in snapshots)
 * limited connection relevant information
 * command completion is just a heuristic
 * probably a good idea to factor out "kernel handling"
