@@ -75,16 +75,16 @@ namespace eval ws::shell {
                         ns_log notice "RESULT FROM info_complete $info // result $result"
                         set reply "can_send = $result;"
                     } else {
-                        set reply "myterm.echo('\[\[;#FFFFFF;\]$result\]');"
+                        set reply "nsshell.myterm.echo('\[\[;#FFFFFF;\]$result\]');"
                     }
                 }
-                error           {set reply "myterm.error('$result');"}
+                error           {set reply "nsshell.myterm.error('$result');"}
                 noreply         {set reply ""}
-                autocomplete    {set reply "update_autocomplete('$result');"}
+                autocomplete    {set reply "nsshell.updateAutocomplete('$result');"}
             }
         } else {
             ns_log warning "command <$msg> not handled"
-            set reply "myterm.error('unhandled request from client');"
+            set reply "nsshell.myterm.error('unhandled request from client');"
         }
         set r [ws::send $channel [::ws::build_msg $reply]]
         debug "[list ws::send $channel $reply] returned $r"
@@ -103,7 +103,7 @@ namespace eval ws::shell {
         if {![regexp {^\[.*\]$} $msg]} {
             error "invalid message <$msg>"
         }
-        set msg [string map {"\\\\" "\\"} $msg]
+        #set msg [string map {"\\\\" "\\"} $msg]
 
         set result ""
         set escaped 0
@@ -127,7 +127,7 @@ namespace eval ws::shell {
                 doubleQuotedWord {
                     if {$char eq "\""} {
                         if {$escaped == 0} {
-                            lappend result $word
+                            lappend result [subst -novariables -nocommands $word]
                             set state wordEnd
                         } else {
                             append word $char
@@ -141,7 +141,11 @@ namespace eval ws::shell {
                             set escaped 0
                         }
                     } else {
+                        if {$escaped == 1} {
+			    append word "\\"
+			}
                         append word $char
+			set escaped 0
                     }
                 }
                 wordEnd {
@@ -157,6 +161,8 @@ namespace eval ws::shell {
                 }
             }
         }
+        #ns_log notice [list json_to_tcl => $result]
+
         return $result
     }
 
@@ -268,7 +274,7 @@ namespace eval ws::shell {
     #
     nx::Class create CurrentThreadHandler -superclass Handler {
 
-        :property {supported:1..n {eval autocomplete heartbeat info_complete}}
+        :property {supported:1..n {eval autocomplete heartbeat}}
 
         :method init {} {
             nsv_array set shell_kernels {}

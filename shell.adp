@@ -86,9 +86,9 @@
 
 <body role="document" class="bg-black h-100 w-100">
 
-  <div id="ns_term" class="w-100 h-100"></div>
+  <div id="nsshell" class="w-100 h-100"></div>
   <script language="javascript" type="text/javascript">
-    var wsUri     = '<%= $wsUri %>'       ; // Websocket Url
+    var wsUri     = '<%= $wsUri %>'       ; // WebSocket Url
     var kernelID  = '<%= $kernelID %>'    ; // Kernel Id
     var heartBeat = parseFloat('<%= [ns_config ns/server/[ns_info server]/module/websocket/shell kernel_heartbeat 3] %>') * 1000 ;
     <%= $script %>
