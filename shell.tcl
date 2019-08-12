@@ -339,7 +339,7 @@ namespace eval ws::shell {
             ns_log notice "CurrentThreadHandler.eval called with <$arg> [namespace exists $kernel]"
             set result [:_eval $arg $kernel $channel]
             if {[dict get $result status] eq "ok"} {
-                nsv_set shell_conn $kernel,snapshot [namespace eval $kernel {snapshot dump}]
+                nsv_set shell_conn $kernel,snapshot [namespace eval $kernel {snapshot get_delta}]
                 #ns_log notice "SNAPSHOT $kernel saved, is now: <[ns_get shell_conn $kernel,snapshot]>"
             }
             #

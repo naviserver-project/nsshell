@@ -121,7 +121,7 @@ namespace eval ws::snapshot {
 	# the difference between the start of the snapshot and the
 	# current state.
 	#
-	:public method dump {} {
+	:public method get_delta {} {
 	    set diff [:diff]
 	    set result ""
 	    foreach e ${:elements} {
