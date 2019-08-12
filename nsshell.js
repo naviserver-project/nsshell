@@ -11,8 +11,8 @@ var nsshell = {
     // Function: init()
     // Description: initialize when document ready
     init: function() {
-        this.initializeTerminal(); // Initialize terminal
-        this.startWebSocket(); // Initialize Websocket
+        this.initializeTerminal();      // Initialize terminal
+        this.initializeCommunication(); // Initialize communication interface
     },
 
     // Initialize terminal
@@ -28,13 +28,10 @@ var nsshell = {
                 if (kernel === undefined) {
                     kernel = '';
                 }
-                // Send command via WebSocket
+                // Send command to the server
                 command = command.trimLeft();
                 if (command !== '') {
-                    //console.log("TRIMMED <" + command +"> " + JSON.stringify(['eval', command, kernelID]));
-                    nsshell.websocket.send(JSON.stringify(['eval', command, kernel]));
-                    //this.websocket.send(JSON.stringify(['info_complete', command, kernelID]));
-                    //cond_send = JSON.stringify(['eval', command, kernel]);
+                    nsshell.doSend(JSON.stringify(['eval', command, kernel]));
                 }
             }, {
                 // Greeting message
@@ -98,8 +95,9 @@ var nsshell = {
                     //
                     if (lastLine != "") {
                         //console.log("TRIMMED <" + lastLine  +"> " + JSON.stringify(['autocomplete', lastLine, kernelID]));
-                        // Get autocomplete options via websocket, look at function updateAutocomplete()
-                        nsshell.websocket.send(JSON.stringify(['autocomplete', lastLine, kernelID]));
+                        // Get autocomplete options from backend.
+                        // See also: function updateAutocomplete(),
+                        nsshell.doSend(JSON.stringify(['autocomplete', lastLine, kernelID]));
                     } else {
                         nsshell.updateAutocomplete("");
                     }
@@ -204,63 +202,16 @@ var nsshell = {
         return this.complete_command;
     },
 
-
-    startWebSocket: function() {
-        if ("WebSocket" in window) {
-            this.websocket = new WebSocket(wsUri);
-        } else {
-            this.websocket = new MozWebSocket(wsUri);
-        }
-        this.websocket.onopen = function (evt) {
-            nsshell.onOpen(evt)
-        };
-        this.websocket.onclose = function (evt) {
-            nsshell.onClose(evt)
-        };
-        this.websocket.onmessage = function (evt) {
-            nsshell.onMessage(evt)
-        };
-        this.websocket.onerror = function (evt) {
-            nsshell.onError(evt)
-        };
-    },
-
-    // Show message when websocket is connected and also start sending heartbeat
-    onOpen: function(evt) {
-        this.myterm.echo('[[;lightgreen;]Kernel "' + this.kernelName + '" is connected.]');
-        this.heartbeat();
-    },
-
-    // Show message when websocket is disconnected and also restart websocket again
-    onClose: function(evt) {
-        this.myterm.echo('[[;red;]Kernel "' + this.kernelName + '" is disconnected.]');
-        this.startWebSocket();
-    },
-
     // Eval received message and scroll to bottom
     onMessage: function(evt) {
         if (evt.data == "") return;
         //console.log("message: evt.data " + evt.data);
         var result = window.eval(evt.data.split("\n").join("\\n"));
-        //if (cond_send != "") {
-        //    console.log("cond_send: " + cond_send + " can_send: " + can_send);
-        //    if (can_send) {
-        //        websocket.send(cond_send);
-        //        console.log("==> message sent");
-        //   }
-        //    cond_send = '';
-        //    can_send = 0;
-        // }
         $('html, body').scrollTop($(document).height());
     },
 
     // Unused
     onError: function(evt) {},
-
-    // Unused
-    doSend: function(message) {
-        this.websocket.send(message);
-    },
 
     // Unused
     checkSubmit: function(e) {
@@ -340,9 +291,50 @@ var nsshell = {
 
     // Sending heartbeat every heartBeat seconds to server
     heartbeat: function() {
-        this.websocket.send(JSON.stringify(['heartbeat', kernelID]));
+        this.doSend(JSON.stringify(['heartbeat', kernelID]));
         setTimeout(function () { nsshell.heartbeat(); }, heartBeat);
+    },
+
+    //
+    // WebSocket specific commands
+    //
+    initializeCommunication: function() {
+        if ("WebSocket" in window) {
+            this.websocket = new WebSocket(wsUri);
+        } else {
+            this.websocket = new MozWebSocket(wsUri);
+        }
+        this.websocket.onopen = function (evt) {
+            nsshell.onOpen(evt)
+        };
+        this.websocket.onclose = function (evt) {
+            nsshell.onClose(evt)
+        };
+        this.websocket.onmessage = function (evt) {
+            nsshell.onMessage(evt)
+        };
+        this.websocket.onerror = function (evt) {
+            nsshell.onError(evt)
+        };
+    },
+
+    // Show message when websocket is connected and also start sending heartbeat
+    onOpen: function(evt) {
+        this.myterm.echo('[[;lightgreen;]Kernel "' + this.kernelName + '" is connected.]');
+        this.heartbeat();
+    },
+
+    // Show message when websocket is disconnected and also restart websocket again
+    onClose: function(evt) {
+        this.myterm.echo('[[;red;]Kernel "' + this.kernelName + '" is disconnected.]');
+        this.startWebSocket();
+    },
+
+    doSend: function(message) {
+        this.websocket.send(message);
     }
+
+
 }
 
 $(document).ready(function () {

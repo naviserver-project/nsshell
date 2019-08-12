@@ -309,7 +309,7 @@ namespace eval ws::shell {
                     ::ws::snapshot::Snapshot create snapshot -namespace [namespace current]
                 }
                 # Restore snapshot
-                ns_log notice "SNAPSHOT $kernel restore <[nsv_get shell_conn $kernel,snapshot]>"
+                #ns_log notice "SNAPSHOT $kernel restore <[nsv_get shell_conn $kernel,snapshot]>"
                 namespace eval $kernel [nsv_get shell_conn $kernel,snapshot]
             }
         }
@@ -376,7 +376,7 @@ namespace eval ws::shell {
         # Santiphap: Autocomplete
         #  - return the possible options
         :public method autocomplete {arg kernel channel} {
-            ns_log notice "=====Autocomplete===== arg <$arg>"
+            ns_log notice "===== Autocomplete ===== arg <$arg>"
             set result {}
             set type ""
             set words [split $arg " "]
