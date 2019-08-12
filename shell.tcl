@@ -60,15 +60,24 @@ namespace eval ws::shell {
         debug "handle_input: msg <$msg>"
         if {[catch {set cmdList [json_to_tcl $msg]} errorMsg]} {
             ns_log error "json_to_tcl returned $errorMsg"
+            return
         }
         lappend cmdList $channel
         debug "handle_input received <$msg> -> $cmdList"
-        if {[lindex $cmdList 0] in [::ws::shell::handler cget -supported]} {
+        set cmd [lindex $cmdList 0]
+        if {$cmd in [::ws::shell::handler cget -supported]} {
             set info [::ws::shell::handler {*}$cmdList]
             debug "handler returned <$info>"
             set result [string map [list ' \\' \r \\r] [dict get $info result]]
             switch [dict get $info status] {
-                ok              {set reply "myterm.echo('\[\[;#FFFFFF;\]$result\]');"}
+                ok              {
+                    if {$cmd eq "info_complete"} {
+                        ns_log notice "RESULT FROM info_complete $info // result $result"
+                        set reply "can_send = $result;"
+                    } else {
+                        set reply "myterm.echo('\[\[;#FFFFFF;\]$result\]');"
+                    }
+                }
                 error           {set reply "myterm.error('$result');"}
                 noreply         {set reply ""}
                 autocomplete    {set reply "update_autocomplete('$result');"}
@@ -90,9 +99,12 @@ namespace eval ws::shell {
     # escaped backslashes and double quotes.
 
     nsf::proc json_to_tcl {msg} {
+        #ns_log notice [list json_to_tcl $msg]
         if {![regexp {^\[.*\]$} $msg]} {
             error "invalid message <$msg>"
         }
+        set msg [string map {"\\\\" "\\"} $msg]
+
         set result ""
         set escaped 0
         set state listStart
@@ -256,7 +268,7 @@ namespace eval ws::shell {
     #
     nx::Class create CurrentThreadHandler -superclass Handler {
 
-        :property {supported:1..n {eval autocomplete heartbeat}}
+        :property {supported:1..n {eval autocomplete heartbeat info_complete}}
 
         :method init {} {
             nsv_array set shell_kernels {}
@@ -336,6 +348,11 @@ namespace eval ws::shell {
             namespace delete $kernel
             ns_log notice "CurrentThreadHandler.eval <$arg> returns $result"
             return $result
+        }
+
+        :public method info_complete {arg kernel channel} {
+            ns_log notice "=====info_complete===== arg <$arg>"
+            return [list status ok result [info complete $arg]]
         }
 
         :method completion_elements {arg kernel channel} {

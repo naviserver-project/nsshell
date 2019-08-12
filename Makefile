@@ -16,6 +16,7 @@ MODNAME = nsshell
 TCL =	shell.adp \
 	shell.tcl \
 	snapshot.tcl \
+	nsshell.js \
 	README.md
 
 #

@@ -25,9 +25,8 @@ Current shortcomings:
 
 * no procs can be defined (required in snapshots)
 * limited connection relevant information
-* single line commands (no handling of multi-line commands, unbalanced
-  braces, etc.)
-
+* command completion is just a heuristic
+* probably a good idea to factor out "kernel handling"
 
 ***
 
