@@ -3,7 +3,7 @@ Interactive Shell for NaviServer
 Release 0.2b
 ------------
 
-    h11728213@s.wu.ac.at
+    สันติภาพ วัชระสุขจิตร (Santiphap Watcharasukchit)
     neumann@wu-wien.ac.at
 
 This is a NaviServer module that implements an interactive shell for

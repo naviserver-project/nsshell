@@ -247,8 +247,8 @@ var nsshell = {
         if (this.autocomplete_options.length > 0 &&
             this.myterm.get_command().trim().split(" ").pop() != this.autocomplete_options.join(" ") &&
             this.myterm.get_command().trim() != "") {
-            $("#autocomplete").html("<a ondblclick='selectCommand(this)'>" +
-                                    this.autocomplete_options.join("</a> <a ondblclick='selectCommand(this)'>") +
+            $("#autocomplete").html("<a ondblclick='nsshell.selectCommand(this)'>" +
+                                    this.autocomplete_options.join("</a> <a ondblclick='nsshell.selectCommand(this)'>") +
                                     "</a>");
         } else {
             $("#autocomplete").html("");

@@ -37,7 +37,7 @@
   #
   # Check, if we are connected via the WebSocket interface or via XHR
   #
-  if {[string match ${shellURL}* [ns_conn url]]} {
+  if {${shellURL} ne "" && [string match ${shellURL}* [ns_conn url]]} {
     ns_log notice "nsshell uses WebSocket interface"
 
     #
