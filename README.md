@@ -1,6 +1,6 @@
 Interactive Shell for NaviServer
 =========================
-Release 0.1b
+Release 0.2b
 ------------
 
     h11728213@s.wu.ac.at
