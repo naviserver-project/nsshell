@@ -11,10 +11,11 @@ endif
 MODNAME = nsshell
 
 #
-# List of components to be installed as the the Tcl module section
+# List of components to be installed in the Tcl module section
 #
-TCL =	shell.adp \
+TCL =	nsshell.adp \
 	shell.tcl \
+	init.tcl \
 	snapshot.tcl \
 	nsshell.js \
 	README.md

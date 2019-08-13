@@ -1,6 +1,7 @@
 var nsshell = {
     kernelName: "user-" + kernelID.substring(0, 5).toLowerCase(), // Username based on KernelId
-    websocket: 0,           // Websocket object
+    websocket: 0,           // WebSocket object
+    xhrURL: '',             // URL for XHR interface
     myterm: null,           // Shell object
     autocomplete_options: null, // Current autocomplete options
     complete_command: 0,    // For checking whether command is complete; currently in complete_command();
@@ -292,54 +293,88 @@ var nsshell = {
     // Sending heartbeat every heartBeat seconds to server
     heartbeat: function() {
         this.doSend(JSON.stringify(['heartbeat', kernelID]));
-        setTimeout(function () { nsshell.heartbeat(); }, heartBeat);
+        setTimeout(function () { nsshell.heartbeat(); }, this.heartBeat);
     },
 
     //
     // WebSocket specific commands
     //
-    initializeCommunication: function() {
-        if ("WebSocket" in window) {
-            this.websocket = new WebSocket(wsUri);
-        } else {
-            this.websocket = new MozWebSocket(wsUri);
-        }
-        this.websocket.onopen = function (evt) {
-            nsshell.onOpen(evt)
+    createWebSocketInterface: function () {
+        console.log("createWebSocketInterface");
+        this.initializeCommunication = function() {
+            if ("WebSocket" in window) {
+                this.websocket = new WebSocket(wsUri);
+            } else {
+                this.websocket = new MozWebSocket(wsUri);
+            }
+            this.websocket.onopen = function (evt) {
+                nsshell.onOpen(evt)
+            };
+            this.websocket.onclose = function (evt) {
+                nsshell.onClose(evt)
+            };
+            this.websocket.onmessage = function (evt) {
+                nsshell.onMessage(evt)
+            };
+            this.websocket.onerror = function (evt) {
+                nsshell.onError(evt)
+            };
         };
-        this.websocket.onclose = function (evt) {
-            nsshell.onClose(evt)
+
+        // Show message when websocket is connected and also start sending heartbeat
+        this.onOpen = function(evt) {
+            this.myterm.echo('[[;lightgreen;]Kernel "' + this.kernelName + '" is connected.]');
+            this.heartbeat();
         };
-        this.websocket.onmessage = function (evt) {
-            nsshell.onMessage(evt)
+
+
+        // Show message when websocket is disconnected and also restart websocket again
+        this.onClose = function(evt) {
+            this.myterm.echo('[[;red;]Kernel "' + this.kernelName + '" is disconnected.]');
+            //this.startWebSocket();
         };
-        this.websocket.onerror = function (evt) {
-            nsshell.onError(evt)
+
+        this.doSend = function(message) {
+            this.websocket.send(message);
         };
     },
 
-    // Show message when websocket is connected and also start sending heartbeat
-    onOpen: function(evt) {
-        this.myterm.echo('[[;lightgreen;]Kernel "' + this.kernelName + '" is connected.]');
-        this.heartbeat();
-    },
+    //
+    // XHR specific commands
+    //
+    createXHRInterface: function () {
+        console.log("createXHRInterface");
 
-    // Show message when websocket is disconnected and also restart websocket again
-    onClose: function(evt) {
-        this.myterm.echo('[[;red;]Kernel "' + this.kernelName + '" is disconnected.]');
-        this.startWebSocket();
-    },
+        this.initializeCommunication = function() {
+            nsshell.heartbeat();
+        };
 
-    doSend: function(message) {
-        this.websocket.send(message);
+        // Not needed for XHR interface
+        //this.onOpen = function(evt) {};
+        //this.onClose = function(evt) {} ;
+
+        this.doSend = function(message) {
+            console.log("doSend " + message);
+            var xhttp = new XMLHttpRequest();
+            xhttp.open("POST", this.xhrURL, true);
+            xhttp.setRequestHeader("Content-type", "application/json; charset=utf-8");
+            xhttp.onreadystatechange = function() {
+                //console.log("doSend readyState " + this.readyState  + " status " + this.status);
+                if (this.readyState == 4 && this.status == 200) {
+                    var data = xhttp.responseText;
+                    if (data == "") return;
+                    console.log("XHR message: data " + data);
+                    var result = window.eval(data.split("\n").join("\\n"));
+                    $('html, body').scrollTop($(document).height());
+                }
+            };
+            xhttp.send(message);
+        };
     }
 
 
-}
 
-$(document).ready(function () {
-    nsshell.init()
-});
+}
 
 //
 // Local variables:

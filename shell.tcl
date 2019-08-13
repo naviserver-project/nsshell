@@ -10,23 +10,22 @@ package require Thread
 #
 # Get configured urls
 #
-set urls [ns_config ns/server/[ns_info server]/module/websocket/shell urls]
-
-if {$urls eq ""} {
-    ns_log notice "websocket: no nsshell configured ([info script])"
-    return
-}
-
+# set webSocketURLs [ns_config ns/server/[ns_info server]/module/websocket/shell urls]
 #
-# Register websocket shell under every configured url
-#
-foreach url $urls {
-    ns_log notice "websocket: shell available under $url"
-    ns_register_adp -noinherit GET $url [file dirname [info script]]/shell.adp
-    # Santiphap: For using shell with specific kernelId
-    ns_register_adp GET $url/kernel/ [file dirname [info script]]/shell.adp
-    ns_register_proc -noinherit GET $url/connect ::ws::shell::connect
-}
+# if {$webSocketURLs eq ""} {
+#     ns_log notice "WebSocket: no nsshell configured ([info script])"
+# } else {
+#     #
+#     # Register WebSocket shell under every configured url
+#     #
+#     foreach url $webSocketURLs {
+#         ns_log notice "WebSocket: shell available under $url"
+#         ns_register_adp -noinherit GET $url [file dirname [info script]]/shell.adp
+#         # Santiphap: For using shell with specific kernelId
+#         ns_register_adp GET $url/kernel/ [file dirname [info script]]/shell.adp
+#         ns_register_proc -noinherit GET $url/connect ::ws::shell::connect
+#     }
+# }
 
 namespace eval ws::shell {
 
@@ -66,7 +65,13 @@ namespace eval ws::shell {
         debug "handle_input received <$msg> -> $cmdList"
         set cmd [lindex $cmdList 0]
         if {$cmd in [::ws::shell::handler cget -supported]} {
-            set info [::ws::shell::handler {*}$cmdList]
+            try {
+                ::ws::shell::handler {*}$cmdList
+            } on error {errorMsg} {
+                ns_log warning "handle_input $cmdList returned: $errorMsg"
+            } on ok {result} {
+                set info $result
+            }
             debug "handler returned <$info>"
             set result [string map [list ' \\' \r \\r] [dict get $info result]]
             switch [dict get $info status] {
@@ -86,9 +91,12 @@ namespace eval ws::shell {
             ns_log warning "command <$msg> not handled"
             set reply "nsshell.myterm.error('unhandled request from client');"
         }
-        set r [ws::send $channel [::ws::build_msg $reply]]
-        debug "[list ws::send $channel $reply] returned $r"
-        #::ws::multicast $term [::ws::build_msg [::ws::build_msg $reply]]
+        if {$channel ne ""} {
+            set r [ws::send $channel [::ws::build_msg $reply]]
+            debug "[list ws::send $channel $reply] returned $r"
+        } else {
+            return $reply
+        }
     }
 
     #
@@ -323,16 +331,27 @@ namespace eval ws::shell {
             #
             :context require $kernel $channel
             #
-            # Santiphap: Execute command in temporary unique namespace
-            # based on kernelId (ws::shell::kernelId)
+            # Qualify cmd and reject certain commands (should be
+            # configurable).
             #
-            debug "[self] CurrentThreadHandler._eval <$arg>"
-            try {
-                namespace eval $kernel $arg
-            } on ok {result} {
-                set status ok
-            } on error {result} {
+            set cmd [namespace which [lindex $arg 0]]
+            debug "[self] CurrentThreadHandler._eval <$arg> <$cmd>"
+
+            if {$cmd in {::return ::exit}} {
                 set status error
+                set result "command rejected: '$arg'"
+            } else {
+                try {
+                    #
+                    # Execute command in temporary unique namespace
+                    # based on kernelId (ws::shell::kernelId)
+                    #
+                    namespace eval $kernel $arg
+                } on ok {result} {
+                    set status ok
+                } on error {result} {
+                    set status error
+                }
             }
             return [list status $status result $result]
         }
@@ -344,6 +363,7 @@ namespace eval ws::shell {
             #
             ns_log notice "CurrentThreadHandler.eval called with <$arg> [namespace exists $kernel]"
             set result [:_eval $arg $kernel $channel]
+
             if {[dict get $result status] eq "ok"} {
                 nsv_set shell_conn $kernel,snapshot [namespace eval $kernel {snapshot get_delta}]
                 #ns_log notice "SNAPSHOT $kernel saved, is now: <[ns_get shell_conn $kernel,snapshot]>"
@@ -441,16 +461,23 @@ namespace eval ws::shell {
 
                     } else {
                         set type subcommands
-                        ns_log notice "Autocomplete subcommand: $sub_arg"
+                        ns_log notice "Autocomplete subcommand: <$sub_arg>"
 
-                        #
-                        # Get matched class/object methods. We use here
-                        # the nsf primitive method, since this works for
-                        # NX and XOTcl.
-                        #
-                        set methods [:completion_elements \
-                                         [list $main ::nsf::methods::object::info::lookupmethods $sub*] \
-                                         $kernel $channel]
+                        try {
+                            #
+                            # Get matched class/object methods. We use here
+                            # the nsf primitive method, since this works for
+                            # NX and XOTcl.
+                            #
+                            :completion_elements \
+                                [list $main ::nsf::methods::object::info::lookupmethods $sub*] \
+                                $kernel $channel
+                        } on error {errorMsg} {
+                            ns_log notice "lookupmethods failed: $errorMsg"
+                            set methods {}
+                        } on ok {result} {
+                            set methods $result
+                        }
                         #
                         # In case, we found no XOTcl/NX methods,
                         # check, if there are Tcl/NaviServer commands
@@ -459,6 +486,7 @@ namespace eval ws::shell {
                         # asserted commands.
                         #
                         if {[llength $methods] == 0} {
+                            ns_log notice "NO methods for <$sub*>"
                             if { $main in {
 
                                 array binary chan clock encoding file info
@@ -482,6 +510,7 @@ namespace eval ws::shell {
                             }
                         }
                         # Sort & unique
+                        ns_log notice "RESULT for <$sub*> -> [concat $methods]"
                         set result [lsort -unique [concat $methods]]
                     }
                 }
@@ -590,13 +619,14 @@ namespace eval ws::shell {
 
     # Santiphap: Clear dead kernels after some timeout
     # - based param "kernel_timeout" in module
-    # - default 10s
-    ns_schedule_proc [ns_config ns/server/[ns_info server]/module/websocket/shell kernel_timeout 10] {
+    # - default 30s
+
+    ns_schedule_proc [ns_config ns/server/[ns_info server]/module/nsshell kernel_timeout 30] {
         array set kernels [nsv_array get shell_kernels]
         foreach name [array names kernels] {
             # Santiphap: Delete kernel if no heartbeat more than 10s
             if { [ns_time] - $kernels($name) >
-                 [ns_config ns/server/[ns_info server]/module/websocket/shell kernel_timeout 10]
+                 [ns_config ns/server/[ns_info server]/module/nsshell kernel_timeout 30]
              } {
                 catch {::ws::shell::kernels do [list interp delete $name]}
                 nsv_unset shell_kernels $name

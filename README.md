@@ -7,17 +7,17 @@ Release 0.1b
     neumann@wu-wien.ac.at
 
 This is a NaviServer module that implements an interactive shell for
-NaviServer. The websocket module
-(https://bitbucket.org/naviserver/websocket) is required for using
-this module. The implementation is based on miniterm developed by Gustaf Neumann.
+NaviServer. The shell can be used via XMLHttpRequests (XHR) or via
+the WebSocket interface, which requires that the websocket module
+(https://bitbucket.org/naviserver/websocket) is installed.
 
 The interactive shell supports the following features:
 
 * Web-based interactive shell
-* Support for Tcl, NX (http://next-scripting.org/),
-  and NaviServer (https://wiki.tcl-lang.org/page/NaviServer) commands
 * Command completion
 * Syntax highlighting
+* Support for Tcl, NX, XOTcl (http://next-scripting.org/),
+  and NaviServer (https://wiki.tcl-lang.org/page/NaviServer) commands
 * Support for snapshots of content of current interpreter (provided by Gustaf Neumann)
 * Support for multi-users
 * Support for "proc" and "nsf::proc"
@@ -29,36 +29,55 @@ Current shortcomings:
 * limited connection relevant information
 * command completion is just a heuristic
 * probably a good idea to factor out "kernel handling"
+* change namespace to nsshell
+* use more consistent naming based on nsshell
 
 ***
 
 Configuration:
 --------------
 
-In order to configure an interactive shell module, add the following
-lines to the config file of NaviServer (assuming the variable $server
-is properly set to the server to be configured.
+In general, the nsshell module can interface via XHR or via WebSocket
+interface with the server.
+
+In order to configure an interactive shell module for XHR mode, add
+the following lines to the config file of NaviServer (assuming the
+variable $server is properly set to the server to be configured.
+
+    #
+    # nsshell configuration (per-server module)
+    #
+    ns_section "ns/server/${server}/modules" {
+        ns_param    nsshell   tcl
+    }
+
+    ns_section "ns/server/${server}/module/nsshell" {
+        ns_param    url                 /nsshell
+        ns_param    kernel_heartbeat    5
+        ns_param    kernel_timeout      10
+	}
+
+The first block makes sure that the Tcl module "nsshell"
+is loaded. The second block defines the following parameters:
+
+* url: url of shell's application
+* shell_heartbeat: kernel heartbeat interval (in seconds)
+* shell_timeout: kernel timeout interval (in seconds)
+
+In order to configure nsshell via the WebSocket interface,
+make sure that the websocket module is loaded and configure then
+the URLs, under which nsshell should be available.
 
     #
     # nsshell configuration (per-server module)
     #
     ns_section "ns/server/${server}/modules" {
         ns_param    websocket tcl
-        ns_param    nsshell   tcl
     }
-    
+
     ns_section "ns/server/${server}/module/websocket/shell" {
-        ns_param    urls                /nsshell
-        ns_param    kernel_heartbeat    3
-        ns_param    kernel_timeout      10
+        ns_param    urls                /websocket/nsshell
     }
-
-The first block makes sure that the modules "websocket" and "nsshell"
-are loaded. The second block defines the following parameters:
-
-* urls: url of shell's application
-* shell_heartbeat: kernel heartbeat interval (in seconds)
-* shell_timeout: kernel timeout interval (in seconds)
 
 
 
