@@ -334,8 +334,9 @@ namespace eval ws::shell {
             # Qualify cmd and reject certain commands (should be
             # configurable).
             #
-            set cmd [namespace which [lindex $arg 0]]
-            debug "[self] CurrentThreadHandler._eval <$arg> <$cmd>"
+            set cmd ""
+            regexp {^\s*(\S+)\s?} $arg - cmd
+            set cmd [namespace which $cmd]
 
             if {$cmd in {::return ::exit}} {
                 set status error
