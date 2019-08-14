@@ -105,6 +105,13 @@
       top: 14px;
       left: 0;
       color: #888888;
+      cursor: grabbing;
+    }
+    #autocomplete a:hover {
+      background-color:#cccccc;
+    }
+    .cmd, .terminal {
+       cursor: default;
     }
   </style>
 </head>
