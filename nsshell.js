@@ -87,7 +87,7 @@ var nsshell = {
                     }
                 },
                 onCommandChange: function (command, term) {
-                    var lines = command.trim().split(/\r?\n/);
+                    var lines = command.split(/\r?\n/);
                     var lastLine = lines[lines.length -1];
                     //
                     // Show autocomplete options when command changes.  If

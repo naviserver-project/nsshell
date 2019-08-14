@@ -504,7 +504,11 @@ namespace eval ws::shell {
                                 } on error {errMsg} {
                                     if {[regexp {: must be (.*)$} $errMsg . subcmds]} {
                                         regsub -all ", or " $subcmds "" subcmds
-                                        set methods [lmap c [split $subcmds ,] {string trim $c}]
+                                        set methods [lmap c [split $subcmds ,] {
+                                            set m [string trim $c]
+                                            if {![string match $sub* $m]} continue
+                                            set m
+                                        }]
                                     }
                                 }
                             }
