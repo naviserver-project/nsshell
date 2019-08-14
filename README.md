@@ -26,11 +26,8 @@ The interactive shell supports the following features:
 
 Current shortcomings:
 
-* subcommand matching
-* probably mouseouver for completions
-* different mouse-cursor for back background?
-* limited connection-relevant information
-* command completion is just a heuristic
+* limited connection-relevant information available
+* Tcl complete command determination is just a heuristic
 * probably a good idea to factor out "kernel handling"
 * change namespace to nsshell
 * use more consistent naming based on nsshell
