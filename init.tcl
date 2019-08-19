@@ -8,7 +8,7 @@ if {$url ne ""} {
     ns_log notice "nsshell: XHR shell registered under url $url"
 
     ns_register_proc -noinherit POST $url {
-	set reply [ws::shell::handle_input {} [ns_conn content]]
+	set reply [::nsshell::handle_input {} [ns_conn content]]
 	#ns_log notice "2: <[ns_conn content]>\n-> $reply"
 	ns_return 200 "application/json; charset=utf-8" $reply
     }
@@ -32,6 +32,6 @@ if {$webSocketURLs eq ""} {
         ns_register_adp -noinherit GET $url [ns_library shared nsshell]/nsshell.adp
         # Santiphap: For using shell with specific kernelId
         ns_register_adp GET $url/kernel/ [ns_library shared nsshell]/nsshell.adp
-        ns_register_proc -noinherit GET $url/connect ::ws::shell::connect
+        ns_register_proc -noinherit GET $url/connect ::nsshell::connect
     }
 }

@@ -2,32 +2,12 @@
 # shell.tcl
 #
 # Santiphap Watcharasukchit, June 2019
-# original: miniterm from Gustaf Neumann, April 2015
+# Gustaf Neumann, April 2015 - August 2019
 #
 package require nsf
 package require Thread
 
-#
-# Get configured urls
-#
-# set webSocketURLs [ns_config ns/server/[ns_info server]/module/websocket/shell urls]
-#
-# if {$webSocketURLs eq ""} {
-#     ns_log notice "WebSocket: no nsshell configured ([info script])"
-# } else {
-#     #
-#     # Register WebSocket shell under every configured url
-#     #
-#     foreach url $webSocketURLs {
-#         ns_log notice "WebSocket: shell available under $url"
-#         ns_register_adp -noinherit GET $url [file dirname [info script]]/shell.adp
-#         # Santiphap: For using shell with specific kernelId
-#         ns_register_adp GET $url/kernel/ [file dirname [info script]]/shell.adp
-#         ns_register_proc -noinherit GET $url/connect ::ws::shell::connect
-#     }
-# }
-
-namespace eval ws::shell {
+namespace eval ::nsshell {
 
     nsf::proc debug {msg} {
         #ns_log notice "nxshell: $msg"
@@ -40,7 +20,7 @@ namespace eval ws::shell {
     #
     nsf::proc connect {} {
         set term [ns_conn url]
-        set channel [ws::handshake -callback [list ws::shell::handle_input -ip [ns_conn peeraddr] -term $term]]
+        set channel [ws::handshake -callback [list ::nsshell::handle_input -ip [ns_conn peeraddr] -term $term]]
         ws::subscribe $channel $term
     }
 
@@ -64,9 +44,9 @@ namespace eval ws::shell {
         lappend cmdList $channel
         debug "handle_input received <$msg> -> $cmdList"
         set cmd [lindex $cmdList 0]
-        if {$cmd in [::ws::shell::handler cget -supported]} {
+        if {$cmd in [::nsshell::handler cget -supported]} {
             try {
-                ::ws::shell::handler {*}$cmdList
+                ::nsshell::handler {*}$cmdList
             } on error {errorMsg} {
                 ns_log warning "handle_input $cmdList returned: $errorMsg"
             } on ok {result} {
@@ -100,7 +80,7 @@ namespace eval ws::shell {
     }
 
     #
-    # ::ws::shell::json_to_tcl
+    # ::nsshell::json_to_tcl
     #
     # Helper function to convert a json object (as produced by the
     # JSON.stringify() function) to a Tcl list. This handles just
@@ -345,7 +325,7 @@ namespace eval ws::shell {
                 try {
                     #
                     # Execute command in temporary unique namespace
-                    # based on kernelId (ws::shell::kernelId)
+                    # based on kernelId (nsshell::kernelId)
                     #
                     namespace eval $kernel $arg
                 } on ok {result} {
@@ -515,7 +495,7 @@ namespace eval ws::shell {
                             }
                         }
                         # Sort & unique
-                        ns_log notice "RESULT for <$sub*> -> [concat $methods]"
+                        #ns_log notice "RESULT for <$sub*> -> [concat $methods]"
                         set result [lsort -unique [concat $methods]]
                     }
                 }
@@ -601,22 +581,21 @@ namespace eval ws::shell {
         }
 
         :public method eval {arg kernel channel} {
-            ns_log notice "[current class] eval <$arg> <$kernel>"
+            debug "[current class] eval <$arg> <$kernel>"
             :useKernel $kernel
             if {$kernel ne ""} {
                 set cmd [list interp eval $kernel $arg]
             } else {
                 set cmd $arg
             }
-            ns_log notice "[current class] executes <kernels do $cmd>"
-            if {[catch {
+            debug "[current class] executes <kernels do $cmd>"
+            try {
                 set info [list status ok result [kernels do $cmd]]
-            } errorMsg]} {
-                ns_log notice "we got an error <$errorMsg> $::errorInfo"
+            } on error {errorMsg} {
+                ns_log warning "nsshell: kernel eval returned error <$errorMsg> $::errorInfo"
                 set info [list status error result $errorMsg]
             }
             return $info
-
         }
     }
     # Santiphap: KernelThreadHandler only uses for store snapshot for each kernel
@@ -633,7 +612,7 @@ namespace eval ws::shell {
             if { [ns_time] - $kernels($name) >
                  [ns_config ns/server/[ns_info server]/module/nsshell kernel_timeout 30]
              } {
-                catch {::ws::shell::kernels do [list interp delete $name]}
+                catch {::nsshell::kernels do [list interp delete $name]}
                 nsv_unset shell_kernels $name
                 foreach key [nsv_array names shell_conn $name,*] {
                     nsv_unset shell_conn $key

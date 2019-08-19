@@ -29,7 +29,6 @@ Current shortcomings:
 * limited connection-relevant information available
 * Tcl complete command determination is just a heuristic
 * probably a good idea to factor out "kernel handling"
-* change namespace to nsshell
 * use more consistent naming based on nsshell
 * no security management
 
