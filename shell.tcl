@@ -130,10 +130,10 @@ namespace eval ::nsshell {
                         }
                     } else {
                         if {$escaped == 1} {
-			    append word "\\"
-			}
+                            append word "\\"
+                        }
                         append word $char
-			set escaped 0
+                        set escaped 0
                     }
                 }
                 wordEnd {
@@ -358,6 +358,10 @@ namespace eval ::nsshell {
         }
 
         :public method info_complete {arg kernel channel} {
+            #
+            # Check, whether the passed in command in "$arg" is a
+            # complete Tcl command.
+            #
             ns_log notice "=====info_complete===== arg <$arg>"
             return [list status ok result [info complete $arg]]
         }
@@ -374,9 +378,12 @@ namespace eval ::nsshell {
             return ""
         }
 
-        # Santiphap: Autocomplete
-        #  - return the possible options
         :public method autocomplete {arg kernel channel} {
+            #
+            # Try to autocomplete the value provided in "$arg".  This
+            # method returns a dict with the "status" and a "result"
+            # consisting of potential completions.
+            #
             ns_log notice "===== Autocomplete ===== arg <$arg>"
             set result {}
             set type ""
@@ -552,6 +559,10 @@ namespace eval ::nsshell {
         }
 
         :public method useKernel {name} {
+            #
+            # Create or use the named kernel. If the kernel does not
+            # exist, create it new by creating an slave interpreter.
+            #
             if {$name ni ${:kernels} && $name ne ""} {
                 ns_log notice "Kernel thread creates kernel (= interp) '$name'"
                 kernels do [list interp create $name]
@@ -564,6 +575,10 @@ namespace eval ::nsshell {
         }
 
         :public method dropKernel {name} {
+            #
+            # Delete a kernel in memory. This method actually deletes
+            # the interpreter used for the kernel.
+            #
             if {$name in ${:kernels} && $name ne ""} {
                 ns_log notice "dropKernel: drop kernel '$name'"
                 #
@@ -581,6 +596,10 @@ namespace eval ::nsshell {
         }
 
         :public method eval {arg kernel channel} {
+            #
+            # Evalulate the command provided by "$arg" in the
+            # specified kernel.
+            #
             debug "[current class] eval <$arg> <$kernel>"
             :useKernel $kernel
             if {$kernel ne ""} {

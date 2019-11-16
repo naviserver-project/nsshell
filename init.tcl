@@ -8,8 +8,9 @@ if {$url ne ""} {
     ns_log notice "nsshell: XHR shell registered under url $url"
 
     ns_register_proc -noinherit POST $url {
+	#ns_log notice "nsshell POST [ns_conn content]"
 	set reply [::nsshell::handle_input {} [ns_conn content]]
-	#ns_log notice "2: <[ns_conn content]>\n-> $reply"
+	#ns_log notice "nsshell POST: <[ns_conn content]>\n-> $reply"
 	ns_return 200 "application/json; charset=utf-8" $reply
     }
 }

@@ -101,13 +101,19 @@ namespace eval ws::snapshot {
 	    $s destroy
 	    return $result
 	}
-	#
-	# Compute differences between dicts
-	#
+
 	:method listDiff {a b} {
+	    #
+	    # Compute differences between dicts
+	    #
 	    return [lmap x $a {if {$x in $b} continue; set x}]
 	}
+
 	:public method diff {} {
+	    #
+	    # Compute the difference of the current workspace with the
+	    # values at snapshot creation time.
+	    #
 	    set current [:collect all]
 	    foreach e ${:elements} {
 		#puts "START $e: [llength [dict get ${:start} $e]]"
@@ -116,12 +122,13 @@ namespace eval ws::snapshot {
 	    }
 	    return $diff
 	}
-	#
-	# Return a Tcl command which can be evaluated to reconstuct
-	# the difference between the start of the snapshot and the
-	# current state.
-	#
+
 	:public method get_delta {} {
+	    #
+	    # Return a Tcl command which can be evaluated to reconstuct
+	    # the difference between the start of the snapshot and the
+	    # current state.
+	    #
 	    set diff [:diff]
 	    set result ""
 	    foreach e ${:elements} {
