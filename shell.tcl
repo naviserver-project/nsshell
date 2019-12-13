@@ -304,7 +304,7 @@ namespace eval ::nsshell {
 
         :public method _eval {arg kernel channel} {
             #
-            # Light weight "eval" method for querying the corrent
+            # Light weight "eval" method for querying the current
             # content of the workspace/snapshot.  This method does
             # NOT update the snapshot, but is intended for
             # e.g. autocompletion and the like.
@@ -397,14 +397,14 @@ namespace eval ::nsshell {
                 set var_prefix [string range $lastWord 1 end]
                 # Santiphap: Get matched variable
                 set var_result [:completion_elements "info vars $var_prefix*" $kernel $channel]
-                # Santiphap: Get matched namepace
+                # Santiphap: Get matched namespace
                 set namespace_parent [join [lreplace [split $var_prefix :] end-1 end] ::]
                 set namespace_pattern [lindex [split $var_prefix :] end]
                 set namespace_result [:completion_elements \
                                           "namespace children ${namespace_parent}:: $namespace_pattern*" \
                                           $kernel $channel]
                 #
-                # Prepend dollar "$" to variable names for the resul
+                # Prepend dollar "$" to variable names for the result
                 #
                 set var_result       [lmap v $var_result {set _ "\$$v"}]
                 set namespace_result [lmap v $namespace_result {set _ "\$${v}::"}]
