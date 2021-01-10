@@ -60,7 +60,7 @@ namespace eval ::nsshell {
                         ns_log notice "RESULT FROM info_complete $info // result $result"
                         set reply "can_send = $result;"
                     } else {
-                        set reply "nsshell.myterm.echo('\[\[;#FFFFFF;\]$result\]');"
+                        set reply "nsshell.myterm.echo('\[\[;#FFFFFF;\][ns_quotehtml $result]\]');"
                     }
                 }
                 error           {set reply "nsshell.myterm.error('$result');"}
@@ -453,9 +453,9 @@ namespace eval ::nsshell {
 
                         try {
                             #
-                            # Get matched class/object methods. We use here
-                            # the nsf primitive method, since this works for
-                            # NX and XOTcl.
+                            # Get matched class/object methods. We use
+                            # here the nsf primitive "lookupmethods",
+                            # since this works for NX and XOTcl.
                             #
                             :completion_elements \
                                 [list $main ::nsf::methods::object::info::lookupmethods $sub*] \
