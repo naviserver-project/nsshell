@@ -3,6 +3,14 @@ package req nx::serializer
 package req xotcl::serializer
 
 namespace eval ws::snapshot {
+    #####################################################
+    # @class Snapshot
+    #####################################################
+    #
+    #    A class providing facilities to save the state of a shell and
+    #    compute delta and diffs.
+    #
+    # @author Gustaf Neumann
     nx::Class create Snapshot {
 	#
 	# Collect the following types of things in the workspace
