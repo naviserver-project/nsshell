@@ -66,6 +66,11 @@ namespace eval ws::snapshot {
 	}
 
 	:public method "collect all" {} {
+	    #
+	    # Invoke :collect on each item in :elements and return a
+	    # dict representation, where :element items are keys and
+	    # outputs of :collect are values.
+	    #
 	    foreach e ${:elements} { dict set d $e [:collect $e] }
 	    return $d
 	}
