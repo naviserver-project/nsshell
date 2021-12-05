@@ -82,19 +82,19 @@
   <title>NaviServer shell</title>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-    crossorigin="anonymous">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.6.3/css/jquery.terminal.min.css"
-    rel="stylesheet" />
-  <link href="https://unpkg.com/prismjs@1.16.0/themes/prism-tomorrow.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" crossorigin="anonymous">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.6.3/css/jquery.terminal.min.css" rel="stylesheet" />
   <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" crossorigin="anonymous">
-  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" crossorigin="anonymous"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.6.3/js/jquery.terminal.min.js"></script>
-  <script src="https://unpkg.com/prismjs@1.16.0/prism.js"></script>
-  <script src="https://unpkg.com/prismjs@1.16.0/components/prism-tcl.js"></script>
-  <script src="https://unpkg.com/jquery.terminal@2.6.3/js/prism.js"></script>
+  
+  <!-- PRISMJS syntax highlighter -->
+  <link href="https://unpkg.com/prismjs@1.23.0/themes/prism-tomorrow.css" rel="stylesheet" />
+  <script src="https://unpkg.com/prismjs@1.23.0/prism.js"></script>
+  <script src="https://unpkg.com/prismjs@1.23.0/components/prism-tcl.js"></script>
+  <script src="https://unpkg.com/jquery.terminal@2.22.0/js/prism.js"></script>
+  
   <style>
     #autocomplete {
       list-style: none;
