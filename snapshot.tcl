@@ -3,6 +3,14 @@ package req nx::serializer
 package req xotcl::serializer
 
 namespace eval ws::snapshot {
+    #####################################################
+    # @class Snapshot
+    #####################################################
+    #
+    #    A class providing facilities to save the state of a shell and
+    #    compute delta and diffs.
+    #
+    # @author Gustaf Neumann
     nx::Class create Snapshot {
 	#
 	# Collect the following types of things in the workspace
@@ -58,6 +66,11 @@ namespace eval ws::snapshot {
 	}
 
 	:public method "collect all" {} {
+	    #
+	    # Invoke :collect on each item in :elements and return a
+	    # dict representation, where :element items are keys and
+	    # outputs of :collect are values.
+	    #
 	    foreach e ${:elements} { dict set d $e [:collect $e] }
 	    return $d
 	}
