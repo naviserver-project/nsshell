@@ -1,3 +1,11 @@
+commit ec3c4c5280ee7c4fe1729fa0606b7a38204bdcea
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2022-06-13
+
+    Added Changelog
+
+M	README.md
+
 commit c2e1edffe51f116b40baadbcaedf783abb0f2d8f
 Merge: f58fcef fdd4deb
 Author: Maksym Zinchenko <siqsuruq@gmail.com>
@@ -6,17 +14,6 @@ Date:   2021-12-05
     Merged in Maksym-Zinchenko/nsshelladp-edited-online-with-bitbucket--1615556547145 (pull request #1)
     
     nsshell.adp edited online with Bitbucket
-    
-    Approved-by: Gustaf Neumann
-
-commit f58fcef239ab756e1b7182ef79cc710cfa7c27c6
-Merge: 77f829b 8f93f37
-Author: Antonio Pisano <apisano@wu.ac.at>
-Date:   2021-12-05
-
-    Merged in adddoc (pull request #2)
-    
-    Add documentation to public class
     
     Approved-by: Gustaf Neumann
 
@@ -252,13 +249,6 @@ Date:   2019-08-10
 
 A	Makefile
 
-commit 7cf670a3f0eca76679b26bd4ca6eca58447a7c6b
-Merge: 6d4a1a5 eee3761
-Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
-Date:   2019-08-08
-
-    Merge branch 'develop-extend'
-
 commit eee3761bccec71e2bad9366f10982cb4d0d9a276
 Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
 Date:   2019-08-08
@@ -320,13 +310,6 @@ Date:   2019-07-22
 
 M	README.md
 
-commit 3cf7d742d6f986ef066f396621d4bc3426ddcd47
-Merge: 225b56c 58b9c48
-Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
-Date:   2019-06-17
-
-    Merge branch 'develop_finalized'
-
 commit 58b9c4852cc38ae078b88419b53cf8c3bea67374
 Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
 Date:   2019-06-17
@@ -367,13 +350,6 @@ Date:   2019-06-17
     Finalized adp
 
 M	shell.adp
-
-commit 225b56c7dd1d79d31c0d1787e40b6b9d19754fde
-Merge: 3971eea b7265b0
-Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
-Date:   2019-06-17
-
-    Merge branch 'develop-prismjs'
 
 commit b7265b008386654bd7d88937dd9d5d05c75b4316
 Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
@@ -506,13 +482,6 @@ Date:   2019-06-03
 
 M	shell.adp
 
-commit 318b7d150d58e7cbb27bcd6a0dd45ecef3a6c833
-Merge: 072dd58 c455f0c
-Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
-Date:   2019-06-03
-
-    Merge branch 'develop-snapshot'
-
 commit c455f0ce8b92e97b16a59823672e24be67269780
 Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
 Date:   2019-06-03
@@ -553,13 +522,6 @@ Date:   2019-06-03
 
 M	shell.adp
 
-commit 072dd589b5aaae18ad413bf9d95223f76f80b052
-Merge: 057b347 947bff5
-Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
-Date:   2019-06-02
-
-    Merge branch 'develop_highlight'
-
 commit 947bff5347d6b709095cc0202989c40b21b01607
 Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
 Date:   2019-06-02
@@ -567,13 +529,6 @@ Date:   2019-06-02
     Highlight commands
 
 M	shell.adp
-
-commit 057b3475ec1712bf830f81dc43f52ec67c04d22a
-Merge: c3be30e c5f78d9
-Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
-Date:   2019-06-02
-
-    Merge branch 'develop_autocomplete'
 
 commit 9e0174f17d1aedd484c98c5ac78c35b96a7f6fb0
 Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
@@ -720,13 +675,6 @@ Date:   2019-06-02
     Catch tab key in terminal
 
 M	shell.adp
-
-commit c3be30e7a34c1d843b6f3c6dce228678602f080d
-Merge: be2670a 8c4d160
-Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
-Date:   2019-05-21
-
-    Merge branch 'develop_ns_conn'
 
 commit 8c4d1607f2d6bf81a28953ca11b055074aef6cbd
 Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
