@@ -1,0 +1,800 @@
+commit c2e1edffe51f116b40baadbcaedf783abb0f2d8f
+Merge: f58fcef fdd4deb
+Author: Maksym Zinchenko <siqsuruq@gmail.com>
+Date:   2021-12-05
+
+    Merged in Maksym-Zinchenko/nsshelladp-edited-online-with-bitbucket--1615556547145 (pull request #1)
+    
+    nsshell.adp edited online with Bitbucket
+    
+    Approved-by: Gustaf Neumann
+
+commit f58fcef239ab756e1b7182ef79cc710cfa7c27c6
+Merge: 77f829b 8f93f37
+Author: Antonio Pisano <apisano@wu.ac.at>
+Date:   2021-12-05
+
+    Merged in adddoc (pull request #2)
+    
+    Add documentation to public class
+    
+    Approved-by: Gustaf Neumann
+
+commit 8f93f370c74f79821d4b7ef895a0d02543f4e76b
+Author: Antonio Pisano <apisano@wu.ac.at>
+Date:   2021-11-25
+
+    Add documentation to public api
+
+M	snapshot.tcl
+
+commit 9332eeb11b698245c346b44a0990bcbdb60b4eaa
+Author: Antonio Pisano <apisano@wu.ac.at>
+Date:   2021-11-02
+
+    Add documentation to public class
+
+M	snapshot.tcl
+
+commit fdd4deb1311c4db786ebe0797d6948908be4c4ce
+Author: Maksym Zinchenko <siqsuruq@gmail.com>
+Date:   2021-03-12
+
+    nsshell.adp edited online with Bitbucket
+    Updated PRISM.JS libraries links , to prevent X-Content-Type-Options errors
+
+M	nsshell.adp
+
+commit 77f829b68d19be745eb1a37fc53b77153f736ffc
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2021-01-28
+
+    added MPL 2 license statement
+
+M	README.md
+
+commit 620d7d99c7b1905e81b6859d46ff2a510f072627
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2021-01-10
+
+    perform HTML quoting on result of tcl commands to avoid potential confusion
+
+M	README.md
+M	shell.tcl
+
+commit a1acc89f5b14e5b00444886b12dfeb9c4fbdb476
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2019-12-13
+
+    improve spelling
+
+M	shell.tcl
+
+commit ab8e715e3511dc23a27c83e0182bebbedd31c95d
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2019-11-16
+
+    improve source code documentation
+
+M	init.tcl
+M	shell.tcl
+M	snapshot.tcl
+
+commit 156b60492f98b743f4854fc358cbcdcd24abcefa
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2019-08-19
+
+    - change automplete picking to a single click
+    - use the nsshell namespace
+
+M	README.md
+M	init.tcl
+M	nsshell.js
+M	shell.tcl
+
+commit ea24f5470984d3aaa3f906fa000484a44af910a9
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2019-08-14
+
+    improve robustness on input which is not accepted as wellformed list
+
+M	shell.tcl
+
+commit 722ed5a38aac5c7219aa804b9b4717cecc320d4e
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2019-08-14
+
+    updated README
+
+M	README.md
+
+commit 19d332e7b989454e78c13d6c3b767af3b8024e4e
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2019-08-14
+
+    improved autocompletion:
+    - preserve trailing space to be able to suggest all options
+    - just show matching options in subcommand handling
+
+M	nsshell.js
+M	shell.tcl
+
+commit abe38c3e0be0e0532d90da57f736343584d6e8af
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2019-08-14
+
+    UI improvements:
+    - make cursor visible again (text cursor on back background is not readable)
+    - make grabbing of completions better visible (hoover + grabbing cursor)
+
+M	README.md
+M	nsshell.adp
+
+commit 71a19b11a494c07aa6094f16b2aabb5fafe9418a
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2019-08-13
+
+    improve robustness, add missing object referfence
+
+M	README.md
+M	nsshell.adp
+M	nsshell.js
+
+commit 11d613f585f64ab5eeb533c4ccf33329abe3ded3
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2019-08-13
+
+    make clear that there is so far not security management
+
+M	README.md
+
+commit 930ae8e70b6d18a43949fb5cd7c14cdd07c54996
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2019-08-13
+
+    bumped version number to 0.2b
+
+M	README.md
+
+commit 72486bd3ac8dd64e5a06d8c6b0e493bf4c04ebbb
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2019-08-13
+
+    provide two switchable communication interfaces, XHR and WebSocket. These interfaces
+    can be used exclusively or together to communication with NaviServer via the shell.
+    
+    Improved robustness, by not allowing all commands to be executed
+
+M	Makefile
+M	README.md
+A	init.tcl
+A	nsshell.adp
+M	nsshell.js
+D	shell.adp
+M	shell.tcl
+
+commit cc5fa0882c8df560708cd9a1eefa4aa91654b14b
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2019-08-12
+
+    refactor communication interface to make clear, what where websockets are used
+
+M	nsshell.js
+M	shell.tcl
+
+commit 69bcecc69ea8e72292cc5b7d7ffd418e43467a28
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2019-08-12
+
+    wrap nsshell behavior into nsshell object
+
+M	nsshell.js
+M	shell.adp
+M	shell.tcl
+
+commit 44db686832279e6e4a92880a70c1db900caa41e6
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2019-08-12
+
+    use everywhere same line-end conventions
+
+M	shell.tcl
+M	snapshot.tcl
+
+commit 6c0de7ad60cefa8f8f508e1067d9af1a69709fc7
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2019-08-12
+
+    added support for procs and nsf::procs
+
+M	README.md
+M	nsshell.js
+M	snapshot.tcl
+
+commit ca1f6096b332215e1c872a9b341340762c1344b8
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2019-08-12
+
+    - Factored out nsshell.js from shell.adp: this eases editing (indentation, syntax highlighting, ...)
+    - added support for multi-line commands
+      * Added half-baked "info_complete" (the backend works, but it is apparently quite tricky
+        to integrate this inside a js function (like e.g. command_complete()).
+      * Added heuristic command_completion code in JavaScript base on examples from terminal.jcubic.pl
+
+M	Makefile
+M	README.md
+A	nsshell.js
+M	shell.adp
+M	shell.tcl
+
+commit f5944aff9b7be10a342483aebe4d89b1642a47c1
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2019-08-10
+
+    add newline to README file
+
+M	README.md
+
+commit 6d3b4653d97040468713c1b221397c51ac4badb1
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2019-08-10
+
+    improve contrast, mention some known shortcomigs
+
+M	README.md
+M	shell.adp
+
+commit ec73a75851c7c01a1694f8bc531cab0ecb9ae223
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2019-08-10
+
+    added Makefile
+
+A	Makefile
+
+commit 7cf670a3f0eca76679b26bd4ca6eca58447a7c6b
+Merge: 6d4a1a5 eee3761
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-08-08
+
+    Merge branch 'develop-extend'
+
+commit eee3761bccec71e2bad9366f10982cb4d0d9a276
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-08-08
+
+    Fix cursor in Firefox
+
+M	shell.adp
+
+commit 6b6459da16c53b2efaaa95e3df7ee6019ebc74fe
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-08-08
+
+    Add double click to select command
+
+M	shell.adp
+
+commit 9ad29c7f9b3a9a780243851b46938091feb52bd4
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-08-08
+
+    Auto add :: if necessary
+
+M	shell.adp
+
+commit 6d4a1a5b73b482332750ff46078ca876cfdb4094
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-08-08
+
+    Update from Gustaf Neumann
+    
+    - support for nx and xotcl
+    - keep snapshots in nsvs
+    - remove highly redundant operations ("internal evals" as used
+      by auto-completion code was producing/deleting the
+      namespaces multiple(!) times for every typed character
+    - replaced several "lindex" operations, where "dict" should be used
+    - add support for selected commands with sub-commands (e.g. Tcl info)
+    - completion for variable names after "set" or "unset"
+    - ...
+
+M	README.md
+M	shell.adp
+M	shell.tcl
+M	snapshot.tcl
+
+commit 7efeef77aeaab957c77acef2d55feba3d8681f6d
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-08-08
+
+    Delete sequence diagrame
+
+D	sequence_diagram.asta
+
+commit a5f376dc149d817638dcf5518d8a3ec57db36fc3
+Author: สันติภาพ วัชระสุขจิตร <iq.at.sk131@gmail.com>
+Date:   2019-07-22
+
+    README.md edited online with Bitbucket
+
+M	README.md
+
+commit 3cf7d742d6f986ef066f396621d4bc3426ddcd47
+Merge: 225b56c 58b9c48
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-17
+
+    Merge branch 'develop_finalized'
+
+commit 58b9c4852cc38ae078b88419b53cf8c3bea67374
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-17
+
+    Update README.md
+
+M	README.md
+
+commit 2921606ad639c0009c2191034d448433f01600a2
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-17
+
+    Timeout and heartbeat interval will be set from module
+
+M	shell.adp
+M	shell.tcl
+
+commit 21f3033a6fdbeb4156894333637f5cb456a50bcf
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-17
+
+    Update readme
+
+M	README.md
+
+commit f594c4ee33d75d5f973a107bbb7983ff9b145b1b
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-17
+
+    Finalized tcl
+
+M	shell.tcl
+
+commit 3feff4a884ac7151456b00061ed8a35c611ed73f
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-17
+
+    Finalized adp
+
+M	shell.adp
+
+commit 225b56c7dd1d79d31c0d1787e40b6b9d19754fde
+Merge: 3971eea b7265b0
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-17
+
+    Merge branch 'develop-prismjs'
+
+commit b7265b008386654bd7d88937dd9d5d05c75b4316
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-17
+
+    Update plugin url
+
+M	shell.adp
+
+commit dfee2d1800c571e830475996ee8a908fc994f8bb
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-17
+
+    Extend PrismJS default keywords
+
+M	shell.adp
+M	shell.tcl
+
+commit 2f29dd1ab536d9f6fab10366558bf2ac5a7e0506
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-17
+
+    Add prismJS (need to add JS/CSS later)
+
+M	shell.adp
+
+commit c4381b9d96672e1025e45e3b8377835d11fbb330
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-17
+
+    Fix syntax highlight
+
+M	shell.adp
+
+commit 2a9e5eb0a29ac833e376afbb99a8cecb6a1134b4
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-04
+
+    Fix trim in autocomplete submethod
+
+M	shell.tcl
+
+commit 8663fbb11a354605c75b7035db07943d4f6698c3
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-04
+
+    remove console.log
+
+M	shell.adp
+
+commit 8927277f4e029f87d15ae3220f553b6aa3ee6216
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-04
+
+    Run autocomplete when start with [
+
+M	shell.adp
+M	shell.tcl
+
+commit 3971eeacb9bfcef4f5e9c0f618a5ad3b38d48d40
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-04
+
+    Fix redirect url
+
+M	shell.adp
+
+commit cc4221a9a2f3c778160442fab89c75616b21341c
+Merge: 9cb61c9 3b1b5c0
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-04
+
+    Merge branch 'develop-customkernel'
+
+commit 3b1b5c0b77a5dcc8985c30dbe988bfc8fff28ba0
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-04
+
+    Clear puts
+
+M	shell.adp
+
+commit 9cb61c908a168d9c4b2d62ca739e246d9ffc3fb0
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-04
+
+    Fix autocomplete variable with namespace
+
+M	shell.tcl
+
+commit 519cc7219c10243a3f786b88c696dacca05ee87b
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-04
+
+    Change autosweeper from channel to heartbeat
+
+M	shell.adp
+M	shell.tcl
+
+commit 54c82565ab23adb5daea44949fffeb820dfeea3a
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-04
+
+    Change generated kernel from ns_conn id to ns_uuid
+
+M	shell.adp
+
+commit 6a5ca6b4d06b119367f8b207d69d213e7d5535fe
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-04
+
+    Update hostname & can specify kernel
+
+M	shell.adp
+M	shell.tcl
+
+commit c6033cfea0df58a379d359fc5feb79c7f8f4a658
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-03
+
+    Delete namespace when error occur
+
+M	shell.tcl
+
+commit b3d63103b1bb0533d31eaf8cb8a3ed99cb76824c
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-03
+
+    Fix autocomplete from onkeydown to oncommandchange
+
+M	shell.adp
+
+commit 318b7d150d58e7cbb27bcd6a0dd45ecef3a6c833
+Merge: 072dd58 c455f0c
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-03
+
+    Merge branch 'develop-snapshot'
+
+commit c455f0ce8b92e97b16a59823672e24be67269780
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-03
+
+    Fix snapshot.tcl
+
+M	snapshot.tcl
+
+commit 11e962583938bd39192b77fa2ea557d5ee3a9cf8
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-03
+
+    Change from manual copy to snapshot
+
+M	shell.tcl
+
+commit 70dfd3e8d4cfb5d84f51872c7343ed188f9bf0d1
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-03
+
+    Fix snapshot to specific namesapce
+
+M	snapshot.tcl
+
+commit 3ebbf168dc0a18fa427808c5cb989d23577a5b5a
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-03
+
+    Add snapshot.tcl
+
+A	snapshot.tcl
+
+commit d9dd5960ce70865888970e74695eedb7fe458ead
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-03
+
+    Fix multi-line output
+
+M	shell.adp
+
+commit 072dd589b5aaae18ad413bf9d95223f76f80b052
+Merge: 057b347 947bff5
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-02
+
+    Merge branch 'develop_highlight'
+
+commit 947bff5347d6b709095cc0202989c40b21b01607
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-02
+
+    Highlight commands
+
+M	shell.adp
+
+commit 057b3475ec1712bf830f81dc43f52ec67c04d22a
+Merge: c3be30e c5f78d9
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-02
+
+    Merge branch 'develop_autocomplete'
+
+commit 9e0174f17d1aedd484c98c5ac78c35b96a7f6fb0
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-02
+
+    Highlight quotes
+
+M	shell.adp
+
+commit 1c8c177b27270720e5f85a2600d08ec58f71ab0f
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-02
+
+    Highlight variables
+
+M	shell.adp
+
+commit c5f78d99433bda2d525371d91f00db3fa840cac7
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-02
+
+    Fix puts with substitute proc
+
+M	shell.tcl
+
+commit 4af1566f722c82694d66afcb13622fc369ba17f2
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-02
+
+    Handle Error in internal_eval
+
+M	shell.tcl
+
+commit 94836dba7f4f6ab9d0690cc285522f8f837afeee
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-02
+
+    Use internal_eval instead of eval
+
+M	shell.tcl
+
+commit dcc797f9995adc85dabe1d6964f15350e44fbbef
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-02
+
+    Auto add :: & fix autocomplete for 2+ args
+
+M	shell.adp
+
+commit d949cf35628d55a99ce0a7af839cd3e9c8080f0a
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-02
+
+    Check if obj/class existed before lookup its method
+
+M	shell.tcl
+
+commit fa92415d3aa9b5efd0ef141e7c06a8dcb3144626
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-02
+
+    Fix whitespace for autocomplete
+
+M	shell.adp
+
+commit c032a746f1230a5fab33fd9414d24685b99a7448
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-02
+
+    Add class/object method autocompletion
+
+M	shell.tcl
+
+commit a7d1ec49db647ca06d697cedaa0e1c02a814fcc4
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-02
+
+    Add prefix $ for variable autocomplete
+
+M	shell.tcl
+
+commit 3f38c827cbbb9d2132be2859e6bda2e431c333c1
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-02
+
+    Add object instances autocomplete
+
+M	shell.tcl
+
+commit 2132f67a4b58cde66e93d0da3abf6b4a7452251c
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-02
+
+    Fix command autocomplete to find commands from kernel
+
+M	shell.tcl
+
+commit 595c5225badf8ce67a791399908105a5ac0e95dd
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-02
+
+    Variable autocomplete
+
+M	shell.tcl
+
+commit 69547b46a4f81992736e9c54f6e1fd7b0061836c
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-02
+
+    Fix enter
+
+M	shell.adp
+
+commit 3cc67791a6aa85007118a77223294871dbba05c2
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-02
+
+    Unique option list
+
+M	shell.tcl
+
+commit 6c59110363d305cb3b25018f3d1d0950c14e218a
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-02
+
+    Complete front-end autocomplete
+
+M	shell.adp
+M	shell.tcl
+
+commit dbefa1cfbf0574383315cf8bfaea5e3c63a30840
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-02
+
+    handle simple commands autocomplete
+
+M	shell.adp
+M	shell.tcl
+
+commit f2db91e7ebeb2f25758b7858fff4258c03efb0f5
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-06-02
+
+    Catch tab key in terminal
+
+M	shell.adp
+
+commit c3be30e7a34c1d843b6f3c6dce228678602f080d
+Merge: be2670a 8c4d160
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-05-21
+
+    Merge branch 'develop_ns_conn'
+
+commit 8c4d1607f2d6bf81a28953ca11b055074aef6cbd
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-05-21
+
+    Add other ns_conn commands & throw error when unsupported
+
+M	shell.adp
+M	shell.tcl
+
+commit 935aa932083c77731d17bc0192c027babbca355e
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-05-20
+
+    Test setting ns_conn value at adp
+
+M	shell.adp
+M	shell.tcl
+
+commit 511e35d52c26eb063be886945e74b52f805f89eb
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-05-20
+
+    Remove AJAX ns_conn and add simple ns_conn with global variable
+
+D	shell-conn.tcl
+M	shell.tcl
+
+commit be2670ab27b268c3829450c290a7a7d264ecc649
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-05-20
+
+    Fix auto sweeper from websocket to thread variable
+
+M	shell.adp
+M	shell.tcl
+
+commit 227c0196188642d24c207faacf0132d1a8557dec
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-05-14
+
+    Add some comments
+
+M	shell.tcl
+
+commit 1d10d08f24dd43fc3e34d50087c2d1e84f3171d4
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-05-14
+
+    Initial commit for shell
+
+A	sequence_diagram.asta
+A	shell-conn.tcl
+A	shell.adp
+A	shell.tcl
+
+commit 9b45d5a5a7c63ed9a843204b17e3f68bd7c00377
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-05-14
+
+    Add gitignore
+
+A	.gitignore
+
+commit 9a88869da19d85a63e5dea865c1b443dd8480f79
+Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
+Date:   2019-05-14
+
+    Initial commit
+
+A	README.md

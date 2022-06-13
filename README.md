@@ -32,7 +32,12 @@ Current shortcomings:
 * use more consistent naming based on nsshell
 * no security management
 
-***
+
+Installation:
+-------------
+
+    cd SOMEPATH/nsshell
+    sudo make install
 
 Configuration:
 --------------
@@ -80,12 +85,6 @@ the URLs, under which nsshell should be available.
     }
 
 
-
-Installation:
--------------
-
-    cd SOMEPATH/nsshell
-    sudo make install
 
 Usage:
 ------
