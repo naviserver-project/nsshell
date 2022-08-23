@@ -209,6 +209,11 @@ namespace eval ::nsshell {
         # }
 
         :public method do {cmd} {
+            #
+            # Execute the provided cmd in the slave thread. If the
+            # thread does not exist, create it.
+            #
+
             #ns_log notice "THREAD [self] received <$cmd>"
             if {![nsv_exists [current class] [self]]} {
                 #
