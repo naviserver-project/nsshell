@@ -54,7 +54,7 @@
 	ns_returnredirect [ns_conn location]/$shellURL
       }
      } else {
-      # If kernel isn't specified on URL, redirect with the generated kernelId
+      # If kernel is not specified on URL, redirect with the generated kernelId
       ns_returnredirect [ns_conn location]/$shellURL/kernel/$kernelID
      }
 
