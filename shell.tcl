@@ -49,6 +49,8 @@ namespace eval ::nsshell {
                 ::nsshell::handler {*}$cmdList
             } on error {errorMsg} {
                 ns_log warning "handle_input $cmdList returned: $errorMsg"
+                dict set info status error
+                dict set info result $errorMsg\n$::errorInfo
             } on ok {result} {
                 set info $result
             }
@@ -291,7 +293,7 @@ namespace eval ::nsshell {
                 namespace eval $kernel {
                     # Santiphap: Create substitute "ns_conn", since original "ns_conn" in kernel will return "no connection"
                     proc ns_conn {args} {
-                        set kernel [lindex [split [namespace current] ::] 6]
+                        set kernel [lindex [split [namespace current] ::] end]
                         if {[nsv_exists shell_conn "$kernel,$args"]} {
                             return [nsv_get shell_conn "$kernel,$args"]
                         } else {
