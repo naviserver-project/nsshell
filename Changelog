@@ -1,3 +1,27 @@
+commit b068d5d9d1baa04111bb1ec3fca1a70a7553281d
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2023-01-30
+
+    nsshell: fixed bug in "ns_conn" emulation, kernel was not correctly identified
+
+M	shell.tcl
+
+commit c015825c6c1af76345c1675013d6a06fb3dcf9e4
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2023-01-06
+
+    quick fix for changes in the version of NaviServer from 2023-01-05
+
+M	nsshell.adp
+
+commit 664c5d5325187c93627a0bad802ab4484b339487
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2022-08-23
+
+    Improve comment.
+
+M	shell.tcl
+
 commit ec3c4c5280ee7c4fe1729fa0606b7a38204bdcea
 Author: Gustaf Neumann <neumann@wu-wien.ac.at>
 Date:   2022-06-13
@@ -502,7 +526,7 @@ commit 70dfd3e8d4cfb5d84f51872c7343ed188f9bf0d1
 Author: Santiphap Watcharasukchit <iq.at.sk131@gmail.com>
 Date:   2019-06-03
 
-    Fix snapshot to specific namesapce
+    Fix snapshot to specific namespace
 
 M	snapshot.tcl
 

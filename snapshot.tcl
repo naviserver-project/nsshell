@@ -138,7 +138,7 @@ namespace eval ws::snapshot {
 
 	:public method get_delta {} {
 	    #
-	    # Return a Tcl command which can be evaluated to reconstuct
+	    # Return a Tcl command which can be evaluated to reconstruct
 	    # the difference between the start of the snapshot and the
 	    # current state.
 	    #
