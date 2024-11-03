@@ -604,7 +604,7 @@ namespace eval ::nsshell {
 
         :public method eval {arg kernel channel} {
             #
-            # Evalulate the command provided by "$arg" in the
+            # Evaluate the command provided by "$arg" in the
             # specified kernel.
             #
             debug "[current class] eval <$arg> <$kernel>"

@@ -1,3 +1,11 @@
+commit 833cb988178b30b6279afa5438b3d2361da61097
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2023-07-13
+
+    improved spelling
+
+M	snapshot.tcl
+
 commit b068d5d9d1baa04111bb1ec3fca1a70a7553281d
 Author: Gustaf Neumann <neumann@wu-wien.ac.at>
 Date:   2023-01-30

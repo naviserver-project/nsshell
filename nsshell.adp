@@ -2,6 +2,7 @@
 <%
   # Get hostname without protocol (i.e. "localhost")
   set host [lindex [split [ns_conn location] "/"] 2]
+  set host [ns_set iget [ns_conn headers] host]
   set wsConfigPath "ns/server/[ns_info server]/module/websocket/shell"
   set shConfigPath "ns/server/[ns_info server]/module/nsshell"
 
@@ -19,7 +20,7 @@
   set wsUri $wsProtocol://$baseURL/connect
 
   # Generate kernelId
-  # Combine uuid with connection id and encrpyt with sha-1
+  # Combine uuid with connection id and encrypt with sha-1
   set kernelID [ns_sha1 "[ns_uuid] [ns_conn id]"]
 
   # Remember ns_conn settings from the start of this shell
@@ -45,17 +46,17 @@
     #
     set xhrURL ""
 
-    # If kernelID is specified on URL, change kernelId to the one
+    # If kernelID is specified on URL, change kernelID to the one
     # specified in the URL
     if {"kernel" in [ns_conn urlv]} {
       set kernelID [string trim [lindex [ns_conn urlv] end]]
       # KernelID cannot empty
       if {$kernelID eq ""} {
-	ns_returnredirect [ns_conn location]/$shellURL
+	ns_returnredirect $shellURL
       }
      } else {
       # If kernel is not specified on URL, redirect with the generated kernelId
-      ns_returnredirect [ns_conn location]/$shellURL/kernel/$kernelID
+      ns_returnredirect $shellURL/kernel/$kernelID
      }
 
   } else {
@@ -75,6 +76,7 @@
       set kernelID $query_kernelID
     }
   }
+
  %>
 <html>
 
