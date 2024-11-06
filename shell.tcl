@@ -533,8 +533,12 @@ namespace eval ::nsshell {
             return [list status noreply result ""]
         }
     }
-    # Santiphap: CurrentThreadHandler will be the main handler
-    CurrentThreadHandler create handler
+
+    CurrentThreadHandler create handler {
+        #
+        # Santiphap: CurrentThreadHandler will be the main handler
+        #
+    }
 
     #
     # Class KernelThreadHandler
@@ -562,7 +566,11 @@ namespace eval ::nsshell {
             #
             THREAD create kernels -cmd [subst {
                 ns_log notice "Kernel thread [self] is running"
-            }]
+            }] {
+                #
+                # KernelThreadHandler instance.
+                #
+            }
         }
 
         :public method useKernel {name} {
@@ -624,8 +632,13 @@ namespace eval ::nsshell {
             return $info
         }
     }
-    # Santiphap: KernelThreadHandler only uses for store snapshot for each kernel
-    KernelThreadHandler create threadHandler
+
+    KernelThreadHandler create threadHandler {
+        #
+        # Santiphap: KernelThreadHandler only uses for store snapshot
+        # for each kernel.
+        #
+    }
 
     # Santiphap: Clear dead kernels after some timeout
     # - based param "kernel_timeout" in module
