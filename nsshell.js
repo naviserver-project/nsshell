@@ -41,12 +41,16 @@ var nsshell = {
                     this.echo('[[;white;]#  Welcome to the NaviServer Shell.  #]');
                     this.echo('[[;white;]######################################]');
                     nsshell.myterm = this;
+                    //nsshell.myterm.echo('GREETING DONE');
+                    //console.info(nsshell.myterm) ;
                 },
                 onInit: function (term) {
                     // Get wrapper from terminal
-                    wrapper = term.cmd().find('.cursor').wrap('<span/>').parent().addClass('cmd-wrapper');
+                    var wrapper = term.cmd().find('.cursor').wrap('<span/>').parent().addClass('cmd-wrapper');
                     // Add autocomplete span to wrapper
-                    $("<span id='autocomplete'></span>").appendTo(wrapper);
+                    $("<span id='nsshell-autocomplete'></span>").appendTo(wrapper);
+                    //console.log("terminal onInit DONE") ;
+                    //nsshell.myterm.echo('terminal onInit');
                 },
                 //name: this.kernelName,
                 prompt: "[[;yellow;]" + nsshell.kernelName + "]" + "$ ",
@@ -99,6 +103,10 @@ var nsshell = {
                         // Get autocomplete options from backend.
                         // See also: function updateAutocomplete(),
                         nsshell.doSend(JSON.stringify(['autocomplete', lastLine, kernelID]));
+
+                        //nsshell.websocket.addEventListener("open", (ev) => {
+                        //    nsshell.doSend(JSON.stringify(['autocomplete', lastLine, kernelID]))
+                        //});
                     } else {
                         nsshell.updateAutocomplete("");
                     }
@@ -240,18 +248,25 @@ var nsshell = {
         }
         // Add '[' if necessary, for autocomplete
         if (this.myterm.get_command().trim().split(" ").pop().charAt(0) == '[') {
-            for (var i = 0; i < this.autocomplete_options.length; i++)
+            for (let i = 0; i < this.autocomplete_options.length; i++)
                 this.autocomplete_options[i] = "[" + this.autocomplete_options[i];
         }
-        // If there is any option, show options
-        if (this.autocomplete_options.length > 0 &&
-            this.myterm.get_command().trim().split(" ").pop() != this.autocomplete_options.join(" ") &&
-            this.myterm.get_command().trim() != "") {
-            $("#autocomplete").html("<a ondblclick='nsshell.selectCommand(this)'>" +
-                                    this.autocomplete_options.join("</a> <a onclick='nsshell.selectCommand(this)'>") +
-                                    "</a>");
+        let element = document.getElementById("nsshell-autocomplete");
+
+        //console.log('X updateAutocomplete options length ' + this.autocomplete_options.length + ' el ' + element);
+        if (!!element) {
+            // If there is any option, show options
+            if (this.autocomplete_options.length > 0 &&
+                this.myterm.get_command().trim().split(" ").pop() != this.autocomplete_options.join(" ") &&
+                this.myterm.get_command().trim() != "") {
+                element.innerHTML = "<a ondblclick='nsshell.selectCommand(this)'>" +
+                    this.autocomplete_options.join("</a> <a onclick='nsshell.selectCommand(this)'>") +
+                    "</a>";
+            } else {
+                element.innerHTML = "";
+            }
         } else {
-            $("#autocomplete").html("");
+            console.log("Autocompletion element is not found");
         }
     },
 
@@ -320,9 +335,14 @@ var nsshell = {
                 nsshell.onError(evt)
             };
         };
-
+        this.messageQueue = [];
         // Show message when websocket is connected and also start sending heartbeat
         this.onOpen = function(evt) {
+            console.log("WebSocket opened.");
+            while (this.messageQueue.length > 0) {
+                const msg = this.messageQueue.shift();
+                this.websocket.send(msg);
+            }
             this.myterm.echo('[[;lightgreen;]Kernel "' + this.kernelName + '" is connected.]');
             this.heartbeat();
         };
@@ -335,7 +355,15 @@ var nsshell = {
         };
 
         this.doSend = function(message) {
-            this.websocket.send(message);
+            console.log("doSend readystate " + this.websocket.readyState);
+            //this.websocket.send(message);
+            if (this.websocket.readyState === 1) {
+               this.websocket.send(message);
+            } else {
+               // Queue the message to be sent when the socket is open
+               this.messageQueue.push(message);
+               console.log("doSend queued");
+             }
         };
     },
 
@@ -365,6 +393,8 @@ var nsshell = {
                     if (data == "") return;
                     console.log("XHR message: data " + data);
                     var result = window.eval(data.split("\n").join("\\n"));
+                    //nsshell.myterm.echo('XXXXX');
+                    //console.log(nsshell.myterm);
                     $('html, body').scrollTop($(document).height());
                 }
             };

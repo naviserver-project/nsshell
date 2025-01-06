@@ -15,7 +15,7 @@ namespace eval ::nsshell {
 
     #
     # The proc "connect" is called, whenever a new websocket is
-    # established.  The terminal name is taken form the url to allow
+    # established.  The terminal name is taken form the URL to allow
     # multiple independent terminal on different urls.
     #
     nsf::proc connect {} {
@@ -74,7 +74,8 @@ namespace eval ::nsshell {
             set reply "nsshell.myterm.error('unhandled request from client');"
         }
         if {$channel ne ""} {
-            set r [ws::send $channel [::ws::build_msg $reply]]
+            set r [ws::send $channel [ns_connchan wsencode -opcode text $reply]]
+            #set r [ws::send $channel [::ws::build_msg $reply]]
             debug "[list ws::send $channel $reply] returned $r"
         } else {
             return $reply

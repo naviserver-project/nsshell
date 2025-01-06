@@ -7,7 +7,8 @@
   set shConfigPath "ns/server/[ns_info server]/module/nsshell"
 
   # Get WebSocket Protocol (i.e. "ws")
-  set wsProtocol [expr {[ns_conn protocol] eq "http" ? "ws" : "wss"}]
+  set proto [ns_set iget [ns_conn headers] x-forwarded-proto [ns_conn protocol]]
+  set wsProtocol [expr {$proto eq "http" ? "ws" : "wss"}]
 
   # Get Shell URL from module (i.e. "nsshell")
   set shellURL [ns_config $wsConfigPath urls]
@@ -52,7 +53,7 @@
       set kernelID [string trim [lindex [ns_conn urlv] end]]
       # KernelID cannot empty
       if {$kernelID eq ""} {
-	ns_returnredirect $shellURL
+        ns_returnredirect $shellURL
       }
      } else {
       # If kernel is not specified on URL, redirect with the generated kernelId
@@ -76,6 +77,16 @@
       set kernelID $query_kernelID
     }
   }
+  set jqt 2.6.3  ;# previous release
+  set jqt 2.7.0  ;# completions broken (autocompletion works now via completion Promise)
+  set jqt 2.28.1 ;# completions broken, OK
+  set jqt 2.29.1 ;# completions broken, OK
+  set jqt 2.29.2 ;# DUPL (duplicated prompt, change between 2.29.1 and 2.29.2)
+  set jqt 2.29.3 ;# DUPL
+  set jqt 2.29.4 ;# DUPL
+  set jqt 2.30.2 ;# DUPL
+
+  set jqt 2.6.3
 
  %>
 <html>
@@ -84,21 +95,23 @@
   <title>NaviServer shell</title>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" crossorigin="anonymous">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.6.3/css/jquery.terminal.min.css" rel="stylesheet" />
-  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" crossorigin="anonymous"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.6.3/js/jquery.terminal.min.js"></script>
-  
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" crossorigin="anonymous" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/<%=$jqt%>/css/jquery.terminal.min.css"
+  rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.8/umd/popper.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/<%=$jqt%>/js/jquery.terminal.min.js"></script>
+
   <!-- PRISMJS syntax highlighter -->
-  <link href="https://unpkg.com/prismjs@1.23.0/themes/prism-tomorrow.css" rel="stylesheet" />
-  <script src="https://unpkg.com/prismjs@1.23.0/prism.js"></script>
-  <script src="https://unpkg.com/prismjs@1.23.0/components/prism-tcl.js"></script>
-  <script src="https://unpkg.com/jquery.terminal@2.22.0/js/prism.js"></script>
-  
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tcl.min.js"></script>
+  <script src="https://unpkg.com/jquery.terminal@<%=$jqt%>/js/prism.js"></script>
+  <!-- <script src="https://unpkg.com/jquery.terminal@<%=$jqt%>/js/unix_formatting.js"></script> -->
+
   <style>
-    #autocomplete {
+    #nsshell-autocomplete {
       list-style: none;
       margin: 0;
       padding: 0;
@@ -109,7 +122,7 @@
       color: #888888;
       cursor: grabbing;
     }
-    #autocomplete a:hover {
+    #nsshell-autocomplete a:hover {
       background-color:#cccccc;
     }
     .cmd, .terminal {
@@ -139,14 +152,14 @@
 
     nsshell.heartBeat = parseFloat('<%= $heartBeat %>') * 1000;
     if (wsUri == '') {
-	nsshell.xhrURL = '<%= $xhrURL %>';
-	nsshell.createXHRInterface();
+        nsshell.xhrURL = '<%= $xhrURL %>';
+        nsshell.createXHRInterface();
     } else {
-	nsshell.createWebSocketInterface();
+        nsshell.createWebSocketInterface();
     }
 
     $(document).ready(function () {
-	nsshell.init()
+        nsshell.init()
     });
   </script>
 </body>

@@ -1,6 +1,6 @@
 Interactive Shell for NaviServer
 ================================
-Release 0.2b
+Release 0.3
 ------------
 
     สันติภาพ วัชระสุขจิตร (Santiphap Watcharasukchit)
