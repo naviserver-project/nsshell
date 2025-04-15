@@ -488,11 +488,43 @@ namespace eval ::nsshell {
                                 array binary chan clock encoding file info
                                 namespace package string trace
 
-                                ns_asynclogfile ns_chan ns_conn
-                                ns_connchan ns_crypto::eckey ns_driver
-                                ns_hmac ns_http ns_ictl ns_info ns_job
-                                ns_logctl ns_md ns_server ns_set ns_thread
-                                ns_urlspace ns_writer nsv_array
+                                ns_accesslog
+                                ns_adp_ctl
+                                ns_asynclogfile
+                                ns_certctl
+                                ns_chan
+                                ns_cond
+                                ns_conn
+                                ns_connchan
+                                ns_critsec
+                                ns_crypto::eckey
+                                ns_crypto::hmac
+                                ns_crypto::md
+                                ns_db
+                                ns_driver
+                                ns_env
+                                ns_hmac
+                                ns_http
+                                ns_ictl
+                                ns_info
+                                ns_ip
+                                ns_job
+                                ns_logctl
+                                ns_md
+                                ns_mutex
+                                ns_perm
+                                ns_proxy
+                                ns_rwlock
+                                ns_sema
+                                ns_server
+                                ns_set
+                                ns_sls
+                                ns_thread
+                                ns_time
+                                ns_urlspace
+                                ns_writer
+                                nsv_array
+                                nsv_dict
 
                             }} {
                                 try {
